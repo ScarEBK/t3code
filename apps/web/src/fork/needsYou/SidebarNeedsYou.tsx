@@ -1,0 +1,110 @@
+import { scopedThreadKey, scopeThreadRef } from "@t3tools/client-runtime/environment";
+import type { ScopedThreadRef } from "@t3tools/contracts";
+import { useRouter } from "@tanstack/react-router";
+import { Schema } from "effect";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { resolveThreadLastVisitedAt, resolveThreadStatusPill } from "~/components/Sidebar.logic";
+import { CollapsibleSectionHeader } from "~/components/ui/collapsible-section-header";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
+import { useLocalStorage } from "~/hooks/useLocalStorage";
+import { useThreadRouteTarget } from "~/hooks/useThreadRouteTarget";
+import { cn } from "~/lib/utils";
+import { useQuietThreadShells } from "~/state/entities";
+import { buildThreadRouteParams } from "~/threadRoutes";
+import { useUiStateStore } from "~/uiStateStore";
+import { openThreadOnRight, sameThreadRef, useSplitRightThread } from "../split/splitViewStore";
+import { collectNeedsYou, NEEDS_YOU_SHORT_LABEL } from "./needsYouLogic";
+
+const EXPANDED_KEY = "t3code:fork:needs-you-expanded";
+const MAX_ROWS = 6;
+
+export function SidebarNeedsYou() {
+  const router = useRouter();
+  const threads = useQuietThreadShells();
+  const localVisits = useUiStateStore((state) => state.threadLastVisitedAtById);
+  const routeTarget = useThreadRouteTarget();
+  const rightRef = useSplitRightThread();
+  const [expanded, setExpanded] = useLocalStorage(EXPANDED_KEY, true, Schema.Boolean);
+  const primaryRef = routeTarget?.kind === "server" ? routeTarget.threadRef : null;
+
+  const items = collectNeedsYou(
+    threads.map((thread) => {
+      const ref = scopeThreadRef(thread.environmentId, thread.id);
+      const key = scopedThreadKey(ref);
+      const lastVisitedAt = resolveThreadLastVisitedAt(thread.lastVisitedAt, localVisits[key]);
+      const pill = resolveThreadStatusPill({ thread: { ...thread, lastVisitedAt } });
+      return {
+        key,
+        value: { ref, title: thread.title, dotClass: pill?.dotClass ?? "" },
+        pillLabel: pill?.label ?? null,
+        updatedAt: thread.updatedAt,
+        archived: thread.archivedAt !== null,
+        onScreen: sameThreadRef(ref, primaryRef) || sameThreadRef(ref, rightRef),
+      };
+    }),
+  );
+  if (items.length === 0) return null;
+
+  const open = (event: ReactMouseEvent, ref: ScopedThreadRef) => {
+    if (event.button === 1 || event.altKey) {
+      event.preventDefault();
+      openThreadOnRight(ref);
+      return;
+    }
+    void router.navigate({ to: "/$environmentId/$threadId", params: buildThreadRouteParams(ref) });
+  };
+  const shown = items.slice(0, MAX_ROWS);
+
+  return (
+    <div className="px-2 pb-1" data-fork-needs-you={items.length}>
+      <CollapsibleSectionHeader
+        expanded={expanded}
+        onClick={() => setExpanded((value) => !value)}
+        accessory={<span className="font-normal tabular-nums">{items.length}</span>}
+        data-testid="fork-needs-you-toggle"
+      >
+        Needs you
+      </CollapsibleSectionHeader>
+      {expanded ? (
+        <ul className="flex flex-col gap-px">
+          {shown.map((item) => (
+            <li key={item.key}>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      onClick={(event) => open(event, item.value.ref)}
+                      onAuxClick={(event) => {
+                        if (event.button === 1) open(event, item.value.ref);
+                      }}
+                      className="flex h-8 w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 text-left text-sm outline-none hover:bg-sidebar-row-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      data-needs-you={item.pillLabel}
+                    />
+                  }
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn("size-[9px] shrink-0 rounded-full", item.value.dotClass)}
+                  />
+                  <span className="min-w-0 flex-1 truncate">{item.value.title}</span>
+                  <span className="shrink-0 text-muted-foreground text-xs">
+                    {NEEDS_YOU_SHORT_LABEL[item.pillLabel]}
+                  </span>
+                </TooltipTrigger>
+                <TooltipPopup side="right">
+                  {item.pillLabel} · Alt-click or middle-click opens it on the right
+                </TooltipPopup>
+              </Tooltip>
+            </li>
+          ))}
+          {items.length > shown.length ? (
+            <li className="px-2.5 py-1 text-muted-foreground text-xs">
+              +{items.length - shown.length} more below
+            </li>
+          ) : null}
+        </ul>
+      ) : null}
+    </div>
+  );
+}

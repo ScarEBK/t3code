@@ -24,8 +24,8 @@
     "id": "needs-you",
     "what": "'Needs you' sidebar group above Working with dots for approval / question / finished-unread; click opens, modifier-click opens on the right",
     "proof": "screenshot with at least 2 needs-you chats + test output for the grouping logic",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "fork/needsYou/SidebarNeedsYou.tsx, a 'Needs you' group pinned at the top of the sidebar (above the thread list and its Working shelf) with the app's own status dots (resolveThreadStatusPill). Sandbox chats from the free replay provider: C:/Users/Administrator/Desktop/Code/t3code-proof/shots/needs-1920-sidebar.png shows 3 needs-you chats: 'Pick the hero copy' (indigo dot, Question = awaiting input), 'Clean up old branches' and 'Deploy the shop update' (green dot, Done = finished and unread). Click -> URL became mcp:fbc5fcb9 'Pick the hero copy' (needs-1920-click-opened.png); Alt-click -> right pane = mcp:1dd51577 (middle-click wired the same way). 390: needs-390-sidebar.png. Grouping logic test needsYouLogic.test.ts (approvals first, newest first, archived dropped, on-screen 'Done' dropped but on-screen approval kept) passed: vp test run apps/web/src/fork -> 5 files / 44 tests passed. Taskbar badge: upstream's setNotificationBadge already counts unread asks/finishes; not duplicated."
   },
   {
     "id": "usage-meter",
