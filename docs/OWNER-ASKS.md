@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-10-28 23:03 Ohio: Mic: same design as attach + send; F9 broken
+
+"Um, can you actually make the mic better? I don't know, what the fuck is this bullshit that you added? Make it the same design, everything as the current app, like adding actually the attachment thing and the send thing. Same design and everything like that. Oh, and I'm clicking on F9, it's not working, I'm not sure why."
+
 ## 2026-10-28 21:00 Ohio
 
 "can you actually make the mic better? ... Make it the same design, everything as the current app, like adding actually the attachment thing and the send thing. Same design and everything like that."
