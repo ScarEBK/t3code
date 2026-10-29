@@ -59,8 +59,8 @@
     "id": "fork-md",
     "what": "FORK.md lists every upstream file touched and why; one-command upstream sync",
     "proof": "git diff --stat upstream/main...HEAD matches FORK.md; sync command run on a scratch branch succeeds",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "FORK.md lists the 10 upstream files the fork edits; 'git diff --numstat upstream/main...HEAD' (excluding apps/web/src/fork/, the new ForkMediaPermissions files, scripts/fork-sync.ts and docs) prints exactly those 10: DesktopWindow.ts +2, Sidebar.tsx +14, ThreadRouteView.tsx +4/-1, ChatComposer.tsx +11/-1, SettingsPanels.tsx +2, SidebarThreadRow.tsx +5, threadActionMenu.logic.ts +6, contextMenuFallback.ts +4, contracts keybindings.ts +2, shared keybindings.ts +2, matching the table. One-command sync: 'node scripts/fork-sync.ts' on a scratch branch (git switch -c scratch/sync-test) printed '6 upstream commits to take, 8 fork commits on top', 'Successfully rebased', 'Done: scratch/sync-test now sits on upstream/main (5eebf77b37)', exit 0, with no conflicts. Scratch branch deleted afterwards. '--merge' mode is for main (no force-push), '--check' only reports."
   },
   {
     "id": "installer",

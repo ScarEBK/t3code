@@ -21,3 +21,10 @@
 - Collapsed phone composer (one-line resting row) stays upstream's; the mic shows once the box is expanded, like Attach.
 - Fork settings (mic on/off, helper URL, usage meter on/off) live in localStorage so upstream's settings contract is untouched.
 - Electron: mic/camera granted only to the app's own windows; every other permission keeps Electron's default.
+- ~18:45 PDT: usage meter, split view, Needs you, FORK.md + fork-sync all passing with proof. Installer build running;
+  design-critic next, then code review + checks.
+- Calls I made: split shortcut is Ctrl+Alt+S (toggles: opens the previous chat on the right, or closes the split).
+  Mod-click on a sidebar row stays upstream's multi-select, so "open on the right" from the sidebar is Alt-click or
+  middle-click. "Needs you" sits at the top of the sidebar (under the usage meter) so it's seen first; the Working
+  shelf stays where upstream has it. Reset times in the meter tooltip are Ohio time (ET). The usage meter tracks
+  Claude only (Scar's provider); it hides when no Claude account reports limits.
