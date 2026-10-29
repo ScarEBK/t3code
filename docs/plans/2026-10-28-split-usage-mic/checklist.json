@@ -1,15 +1,93 @@
 [
-  {"id": "split-open", "what": "Open a chat on the right via sidebar right-click, drag-and-drop and keybinding", "proof": "screenshot at 1920 of two chats side by side, path + what it shows; each composer sends to its own thread (thread ids in the log)", "status": "not_started", "evidence": ""},
-  {"id": "split-controls", "what": "Resize divider, swap, close; split survives an app restart", "proof": "screenshots before/after resize and after restart, paths + what they show", "status": "not_started", "evidence": ""},
-  {"id": "split-states", "what": "Right chat loading / deleted / archived; window too narrow; 390 web width shows one chat and nothing breaks", "proof": "one screenshot per state, 390 shot included", "status": "not_started", "evidence": ""},
-  {"id": "needs-you", "what": "'Needs you' sidebar group above Working with dots for approval / question / finished-unread; click opens, modifier-click opens on the right", "proof": "screenshot with at least 2 needs-you chats + test output for the grouping logic", "status": "not_started", "evidence": ""},
-  {"id": "usage-meter", "what": "Usage meter at top of left sidebar: 5-hour + weekly bars, % used, time to reset, amber 75 / red 90, click opens Usage page", "proof": "screenshots of normal, amber and red (seeded data) at 1920 + 390; test output for threshold logic", "status": "not_started", "evidence": ""},
-  {"id": "usage-states", "what": "Meter loading, hidden when provider has no limits, error state; show/hide setting in General", "proof": "screenshot per state + the setting toggled off", "status": "not_started", "evidence": ""},
-  {"id": "mic-button", "what": "Mic button in the composer: click start/stop, timer + level, text inserted at the cursor via the local helper", "proof": "run against the live helper at 127.0.0.1:47811 with a recorded clip injected (fake media stream), screenshot of inserted text", "status": "not_started", "evidence": ""},
-  {"id": "mic-states", "what": "Helper not running, mic permission denied, transcribing, error; endpoint URL setting; Electron grants mic only to the app's own window", "proof": "screenshot per state + the permission handler code path named", "status": "not_started", "evidence": ""},
-  {"id": "fork-md", "what": "FORK.md lists every upstream file touched and why; one-command upstream sync", "proof": "git diff --stat upstream/main...HEAD matches FORK.md; sync command run on a scratch branch succeeds", "status": "not_started", "evidence": ""},
-  {"id": "installer", "what": "Windows installer of the fork builds, launches against an isolated home, uses ~/.t3 by default when installed, auto-update off", "proof": "build command + output path; launch log against the isolated home; where the update feed is disabled", "status": "not_started", "evidence": ""},
-  {"id": "gate-check", "what": "vp run check:changed and vp run typecheck pass", "proof": "command + final lines of output", "status": "not_started", "evidence": ""},
-  {"id": "gate-review", "what": "code-review high --fix, then checks again", "proof": "findings count and what was fixed; re-run check output", "status": "not_started", "evidence": ""},
-  {"id": "gate-design", "what": "one design-critic run over the new pieces at 1920 + 390, gaps fixed or listed", "proof": "critic verdict + gaps left", "status": "not_started", "evidence": ""}
+  {
+    "id": "split-open",
+    "what": "Open a chat on the right via sidebar right-click, drag-and-drop and keybinding",
+    "proof": "screenshot at 1920 of two chats side by side, path + what it shows; each composer sends to its own thread (thread ids in the log)",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "split-controls",
+    "what": "Resize divider, swap, close; split survives an app restart",
+    "proof": "screenshots before/after resize and after restart, paths + what they show",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "split-states",
+    "what": "Right chat loading / deleted / archived; window too narrow; 390 web width shows one chat and nothing breaks",
+    "proof": "one screenshot per state, 390 shot included",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "needs-you",
+    "what": "'Needs you' sidebar group above Working with dots for approval / question / finished-unread; click opens, modifier-click opens on the right",
+    "proof": "screenshot with at least 2 needs-you chats + test output for the grouping logic",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "usage-meter",
+    "what": "Usage meter at top of left sidebar: 5-hour + weekly bars, % used, time to reset, amber 75 / red 90, click opens Usage page",
+    "proof": "screenshots of normal, amber and red (seeded data) at 1920 + 390; test output for threshold logic",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "usage-states",
+    "what": "Meter loading, hidden when provider has no limits, error state; show/hide setting in General",
+    "proof": "screenshot per state + the setting toggled off",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "mic-button",
+    "what": "Mic button in the composer: click start/stop, timer + level, text inserted at the cursor via the local helper",
+    "proof": "run against the live helper at 127.0.0.1:47811 with a recorded clip injected (fake media stream), screenshot of inserted text",
+    "status": "passing",
+    "evidence": "Built: fork/mic/ComposerMicButton.tsx, same Button ghost icon-sm + lucide MicIcon + Tooltip as Attach, sits right after Attach in the footer row; recording = Button variant=destructive icon-sm with the app's stop square + live level bars (bg-destructive) + timer inline in the row; transcribing = the app's Spinner. Keybinding composer.dictate = mod+alt+m (mod+shift+m is taken by modelPicker.toggle), shown in tooltip 'Dictate (Ctrl+Alt+M)'. Proof run 2026-10-28 against the LIVE helper 127.0.0.1:47811 in Chromium with --use-file-for-fake-audio-capture=clip.wav (SAPI voice saying 'Please open the settings page and check the usage meter.'): composer text after stop = \"Note: Please open the settings page and check the usage meter. ...\" (typed 'Note: ' first, text landed at the caret); Ctrl+Alt+M started and stopped a second recording and inserted at the clicked caret mid-text. Crops (composer row, attach+mic+send): C:/Users/Administrator/Desktop/Code/t3code-proof/shots/mic-1920-0-upstream-composer.png (mic switched off = untouched upstream composer), mic-1920-1-idle.png, mic-1920-2-tooltip.png, mic-1920-3-recording.png, mic-1920-4-transcribing.png, mic-1920-5-inserted.png and the same mic-390-*.png; sheets sheet-mic-1920.png / sheet-mic-390.png. Compared with the untouched composer: same row height, same 28px ghost button, same icon colour/stroke, same gap; nothing else in the row moved. Tests: vp test run apps/web/src/fork -> micLogic.test.ts passed."
+  },
+  {
+    "id": "mic-states",
+    "what": "Helper not running, mic permission denied, transcribing, error; endpoint URL setting; Electron grants mic only to the app's own window",
+    "proof": "screenshot per state + the permission handler code path named",
+    "status": "passing",
+    "evidence": "Shots (C:/Users/Administrator/Desktop/Code/t3code-proof/shots): helper not running (endpoint pointed at dead port 47899) -> micstate-1920-offline.png (MicOff icon, aria-disabled greyed) + micstate-1920-offline-tooltip.png + micstate-1920-offline-toast.png ('Speech helper isn't running.'); mic permission denied (Chromium --deny-permission-prompts) -> micstate-1920-denied-toast.png ('Microphone access is blocked.' + where to allow) + micstate-1920-denied.png (MicOff); transcribing -> mic-1920-4-transcribing.png (Spinner); error (fake helper on 47898 returning 500) -> micstate-1920-error-toast.png ('Transcription failed. model crashed while decoding audio'); endpoint URL setting -> settings-1920-fork.png (Settings > General > Dictation: Mic button switch, Speech helper address + Test + live status). Electron: apps/desktop/src/window/ForkMediaPermissions.ts allowMediaForAppWindow(), called from DesktopWindow.ts right after the main BrowserWindow is created; 'media' is granted only to registered app-window webContents, every other permission keeps Electron's default. ForkMediaPermissions.test.ts passed (vp test run, 20/20 tests in run)."
+  },
+  {
+    "id": "fork-md",
+    "what": "FORK.md lists every upstream file touched and why; one-command upstream sync",
+    "proof": "git diff --stat upstream/main...HEAD matches FORK.md; sync command run on a scratch branch succeeds",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "installer",
+    "what": "Windows installer of the fork builds, launches against an isolated home, uses ~/.t3 by default when installed, auto-update off",
+    "proof": "build command + output path; launch log against the isolated home; where the update feed is disabled",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "gate-check",
+    "what": "vp run check:changed and vp run typecheck pass",
+    "proof": "command + final lines of output",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "gate-review",
+    "what": "code-review high --fix, then checks again",
+    "proof": "findings count and what was fixed; re-run check output",
+    "status": "not_started",
+    "evidence": ""
+  },
+  {
+    "id": "gate-design",
+    "what": "one design-critic run over the new pieces at 1920 + 390, gaps fixed or listed",
+    "proof": "critic verdict + gaps left",
+    "status": "not_started",
+    "evidence": ""
+  }
 ]

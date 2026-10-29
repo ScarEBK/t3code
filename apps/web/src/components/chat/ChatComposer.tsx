@@ -228,6 +228,7 @@ import { observeResize } from "~/lib/observeResize";
 
 const isEnvironmentRequestInvalidError = Schema.is(EnvironmentRequestInvalidError);
 import { toastManager } from "../ui/toast";
+import { ComposerMicButton } from "~/fork/mic/ComposerMicButton";
 import { PlayIcon } from "lucide-react";
 import { proposedPlanTitle } from "@t3tools/shared/proposedPlanText";
 import { hasProviderSetup } from "./ProviderStatusBanner";
@@ -3429,7 +3430,16 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                   showMobilePendingAnswerActions && "hidden sm:flex",
                 )}
               >
-                {composerAttachButton ? <div className="me-2">{composerAttachButton}</div> : null}
+                <div className="me-2 flex items-center gap-0.5 empty:hidden">
+                  {composerAttachButton}
+                  <ComposerMicButton
+                    keybindings={keybindings}
+                    disabled={!canOperateThread}
+                    onTranscript={(text) =>
+                      insertComposerTextStable(text, "cursor", { ensureLeadingBoundary: true })
+                    }
+                  />
+                </div>
                 <div
                   data-chat-composer-actions="right"
                   data-chat-composer-transition-actions="true"
