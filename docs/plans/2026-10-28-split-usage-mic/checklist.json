@@ -31,15 +31,15 @@
     "id": "usage-meter",
     "what": "Usage meter at top of left sidebar: 5-hour + weekly bars, % used, time to reset, amber 75 / red 90, click opens Usage page",
     "proof": "screenshots of normal, amber and red (seeded data) at 1920 + 390; test output for threshold logic",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "Built fork/usage/SidebarUsageMeter.tsx at the top of the left sidebar (one line in Sidebar.tsx). Reads the same presentationsWithProvidersAtom + collectLimitPools data as the Usage page; only asks the server once when Claude was never probed, through the Usage page's shared 5-minute throttle (no polling). Real data from the sandbox server (live Claude account): C:/Users/Administrator/Desktop/Code/t3code-proof/shots/usage-1920-real.png shows '5-hour 39% used · 1h 41m', 'Weekly 36% used · 1d 2h'. Seeded (dev-only fixture): usage-1920-ready-42-18.png normal (grey bars), usage-1920-ready-78-51.png amber 5-hour, usage-1920-ready-93-88.png red 5-hour + amber weekly; 390: usage-390-real.png, usage-390-ready-78-51.png, usage-390-ready-93-88.png; sheet sheet-usage-1920.png. Tooltip shows reset time in Ohio time ('resets Wed 9:40 PM ET'). Click -> URL http://localhost:5733/usage (usage-1920-click-opens-usage.png). Threshold logic: usageMeterLogic.test.ts (75 -> warning, 90 -> critical, edges 74/89) passed in 'vp test run apps/web/src/fork' (34/34)."
   },
   {
     "id": "usage-states",
     "what": "Meter loading, hidden when provider has no limits, error state; show/hide setting in General",
     "proof": "screenshot per state + the setting toggled off",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "C:/Users/Administrator/Desktop/Code/t3code-proof/shots/usage-1920-loading.png (skeleton rows), usage-1920-error.png ('Usage unavailable' + reason in tooltip), hidden when no Claude provider / account without subscription limits / provider disabled (deriveMeterState tests: 'hidden without a Claude provider', 'hidden for accounts without subscription limits'), setting toggled off -> usage-1920-off.png (meter gone, sidebar exactly upstream). Setting lives in Settings > General > Usage meter: settings-1920-fork-usage.png."
   },
   {
     "id": "mic-button",
