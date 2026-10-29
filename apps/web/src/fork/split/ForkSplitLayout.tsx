@@ -3,15 +3,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { useNavigate } from "@tanstack/react-router";
 import * as Option from "effect/Option";
 import { ArchiveIcon, ArrowLeftRightIcon, Columns2Icon, TrashIcon, XIcon } from "lucide-react";
-import {
-  createContext,
-  type CSSProperties,
-  type ReactNode,
-  use,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, type ReactNode, use, useEffect, useRef, useState } from "react";
 import ChatView from "~/components/ChatView";
 import { BackgroundThreadContext } from "~/components/chat/backgroundThread";
 import {
@@ -21,6 +13,7 @@ import {
 } from "~/components/chat/threadContextDrag";
 import { RightPanelResizeHandle } from "~/components/preview/RightPanelResizeHandle";
 import { Button } from "~/components/ui/button";
+import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from "~/components/ui/empty";
 import { Spinner } from "~/components/ui/spinner";
 import { toastManager } from "~/components/ui/toast";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
@@ -34,6 +27,7 @@ import { useQuietThreadShell } from "~/state/entities";
 import { primaryServerKeybindingsAtom } from "~/state/server";
 import { useEnvironmentThread } from "~/state/threads";
 import { buildThreadRouteParams } from "~/threadRoutes";
+import { SplitPaneRoleContext } from "./splitPaneRole";
 import { resolveSecondaryPaneState } from "./splitPaneState";
 import {
   closeSplit,
@@ -48,10 +42,7 @@ import {
   useSplitRightThread,
 } from "./splitViewStore";
 
-export const SPLIT_COMMAND = "split.toggle";
-
-export type SplitPaneRole = "primary" | "secondary" | null;
-export const SplitPaneRoleContext = createContext<SplitPaneRole>(null);
+const SPLIT_COMMAND = "split.toggle";
 
 const DROP_TARGET_KEY = "fork-split-drop";
 
@@ -73,7 +64,11 @@ export function ForkSplitLayout({
   const rightRef = useSplitRightThread();
   const hostRef = useRef<HTMLDivElement>(null);
   const [hostWidth, setHostWidth] = useState(0);
-  notePrimaryThread(primaryRef);
+
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- records the shown chat in a module store after commit, so a discarded render can't pair the shortcut with a chat that never showed
+  useEffect(() => {
+    notePrimaryThread(primaryRef);
+  }, [primaryRef]);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- measures the main area so the split can fall back when two chats don't fit
   useEffect(() => {
@@ -124,11 +119,15 @@ export function ForkSplitLayout({
   return (
     <>
       <span ref={hostRef} hidden />
-      {showSplit && rightRef ? (
-        <div className="flex min-h-0 min-w-0 flex-1" data-fork-split="on">
-          <div className="relative flex min-h-0 min-w-0 flex-1" data-fork-split-pane="primary">
-            <SplitPaneRoleContext value="primary">{children}</SplitPaneRoleContext>
-          </div>
+      {/* One stable wrapper, so opening/closing the split (or resizing across the breakpoint)
+          never remounts the routed chat: that would drop scroll, focus and a live recording. */}
+      <div className="flex min-h-0 min-w-0 flex-1" data-fork-split={showSplit ? "on" : "off"}>
+        <div className="relative flex min-h-0 min-w-0 flex-1" data-fork-split-pane="primary">
+          <SplitPaneRoleContext value={showSplit ? "primary" : null}>
+            {children}
+          </SplitPaneRoleContext>
+        </div>
+        {showSplit && rightRef ? (
           <SecondaryPane
             key={`${rightRef.environmentId}:${rightRef.threadId}`}
             threadRef={rightRef}
@@ -136,10 +135,8 @@ export function ForkSplitLayout({
             background={background}
             onSwap={swap}
           />
-        </div>
-      ) : (
-        children
-      )}
+        ) : null}
+      </div>
       {splitOn && mode === "too-narrow" && !background ? <TooNarrowPill /> : null}
       {!background && mode === "split" ? (
         <SplitDropZone primaryRef={primaryRef} rightPaneOpen={showSplit} />
@@ -264,19 +261,17 @@ function PaneNotice({ state }: { readonly state: "loading" | "archived" | "delet
   }
   const archived = state === "archived";
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-      {archived ? (
-        <ArchiveIcon className="size-5 text-muted-foreground" aria-hidden="true" />
-      ) : (
-        <TrashIcon className="size-5 text-muted-foreground" aria-hidden="true" />
-      )}
-      <p className="text-sm text-foreground">
-        {archived ? "This chat is archived." : "This chat was deleted."}
-      </p>
-      <Button type="button" variant="outline" size="sm" onClick={closeSplit}>
-        Close right side
-      </Button>
-    </div>
+    <Empty className="flex-1">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">{archived ? <ArchiveIcon /> : <TrashIcon />}</EmptyMedia>
+        <EmptyTitle>{archived ? "This chat is archived" : "This chat was deleted"}</EmptyTitle>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button type="button" variant="outline" size="sm" onClick={closeSplit}>
+          Close right side
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
 

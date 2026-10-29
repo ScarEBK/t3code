@@ -28,3 +28,13 @@
   middle-click. "Needs you" sits at the top of the sidebar (under the usage meter) so it's seen first; the Working
   shelf stays where upstream has it. Reset times in the meter tooltip are Ohio time (ET). The usage meter tracks
   Claude only (Scar's provider); it hides when no Claude account reports limits.
+- ~19:10 PDT: installer built + launched against an isolated home (passing). check:changed found fork-sync lint/knip
+  issues, 13 unused exports and a desktop test crash (test doubles have no session): all fixed. code-review high --fix:
+  8 findings, 6 fixed (split remount, render-time store write, circular import, two mic leaks, timeout message).
+  design-critic: not ready, 5 big gaps; fixed the stop button (now the app's round Interrupt circle), usage meter
+  (now "% left", "Session", provider colour like the Usage page), Needs you (row's own icons + words, sits below
+  Search), mic never shows a crossed-out icon, short tooltips/settings copy, Test button height, menu group, Empty state.
+- Calls I made: the installer build skips the Spectre-libs preflight by prebuilding the resource monitor (installing
+  Spectre needs an elevated VS installer = a UAC prompt on Scar's screen). Left as gaps: chats in Needs you also show in
+  the list below; split swap/close buttons stay on the divider (moving them into the pane header means editing
+  upstream's header).

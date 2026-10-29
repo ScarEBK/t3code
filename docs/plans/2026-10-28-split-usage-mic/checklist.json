@@ -66,28 +66,28 @@
     "id": "installer",
     "what": "Windows installer of the fork builds, launches against an isolated home, uses ~/.t3 by default when installed, auto-update off",
     "proof": "build command + output path; launch log against the isolated home; where the update feed is disabled",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "Build: T3CODE_DESKTOP_REUSE_RESOURCE_MONITOR=true node scripts/build-desktop-artifact.ts --platform win --target nsis --arch x64 (GITHUB_REPOSITORY / T3CODE_DESKTOP_UPDATE_REPOSITORY unset, unsigned). Resource monitor prebuilt first with `cargo build --locked --release --target x86_64-pc-windows-msvc` (CARGO EXIT 0) because the preflight's MSVC Spectre-libs check needs an elevated VS installer (UAC; exit 5007 unelevated) and the Rust crate does not use them. Log: t3code-proof/installer-build.log -> \"Validated Windows payload (53 files, 12 sidecar natives)\", BUILD EXIT 0.\nOutput: release/T3-Code-0.1.3-x64.exe (167,944,791 bytes) + .blockmap. No latest.yml.\nLaunch: extracted the NSIS payload with 7z (never installed) to t3code-proof/inst/app, ran \"T3 Code (Beta).exe\" with T3CODE_HOME=inst/home, APPDATA=inst/appdata, LOCALAPPDATA=inst/localappdata, T3CODE_PORT=47930. launch.log: \"app ready\" -> \"using configured backend port 47930\" -> \"backend ready\"; http://127.0.0.1:47930/ answered after 4s; stopped by its own PID (taskkill /PID 22504 /T). Home created inst/home/{userdata,bin,caches,worktrees}; Scar's ~/.t3 and port 3773 untouched. Fork web code present in server.asar (t3code:fork:mic-enabled found).\nUpdate feed: inst/app/resources/app-update.yml does not exist -> DesktopUpdates.getAutoUpdateDisabledReason returns \"Automatic updates are not available because no update feed is configured.\" (hasUpdateFeedConfig false), so the fork never pulls the official release. Default home when T3CODE_HOME is unset is ~/.t3 (same as official), so an install keeps Scar's data."
   },
   {
     "id": "gate-check",
     "what": "vp run check:changed and vp run typecheck pass",
     "proof": "command + final lines of output",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "`vp run check:changed` (final run 19:24-19:29 PDT, log t3code-proof/check-changed3.log): pass unused patches, pass format, pass lint, pass knip 1/2, pass knip 2/2, pass typecheck (36 packages), pass test (20 files: 15 files / 193 tests passed). `vp run typecheck` (t3code-proof/typecheck.log): \"36/36 successful\", TYPECHECK EXIT 0. Earlier failures fixed on the way: fork-sync.ts lint (namespace import, comment length) + Effect diagnostics, knip unused file (now the `fork:sync` package script) + 13 unused exports, DesktopWindow tests crashing in allowMediaForAppWindow (test doubles have no session; now skipped), format on 2 files, and the browser test project's missing chromium_headless_shell-1223 (installed with `playwright install chromium-headless-shell`). Fork tests: `vp test run apps/web/src/fork` -> 4 files / 45 tests passed."
   },
   {
     "id": "gate-review",
     "what": "code-review high --fix, then checks again",
     "proof": "findings count and what was fixed; re-run check output",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "Skill code-review `high --fix` on feat/split-usage-mic vs origin/main: 8 findings, 6 fixed: (1) ForkSplitLayout remounted the routed chat when the split opened/closed or the width arrived -> one stable wrapper; (2) notePrimaryThread wrote a module store during render -> moved to an effect; (3) circular import ComposerMicButton -> ForkSplitLayout -> ChatView -> ChatComposer -> ComposerMicButton -> SplitPaneRoleContext moved to fork/split/splitPaneRole.ts; (4) mic stream leaked if the composer unmounted while the permission prompt was open -> cancelled; (5) stream leaked if AudioContext setup threw -> stopped; (6) a body-read timeout read as 'no words' -> now 'took too long' (+ a stale comment). Skipped with reason: meter skeleton if a Claude provider never reports limits after its one probe (needs a probe-finished state); NotReadableError (mic busy) shown as 'No microphone found'. Checks re-run after: check:changed all pass, vp run typecheck 36/36 (see gate-check)."
   },
   {
     "id": "gate-design",
     "what": "one design-critic run over the new pieces at 1920 + 390, gaps fixed or listed",
     "proof": "critic verdict + gaps left",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "design-critic (Opus, one run, bar = T3 Code's own UI): verdict NOT READY with 5 main gaps + smaller ones. Fixed and re-shot (t3code-proof/shots): (1) mic stop was a red square vs the app's round Interrupt -> now the same round destructive circle classes as ComposerPrimaryActions (mic-1920-3-recording.png, mic-390-3-recording.png, dark-1920-recording.png); (2) meter said \"39% used\"/\"5-hour\"/grey while Usage says \"61% left\"/\"Session\"/provider colour -> now \"% left\", \"Session\"/\"Weekly\", provider colour at 35% on bg-muted, amber/red only on the number (usage-1920-real.png, usage-1920-ready-93-88.png, usage-390-real.png); (3) Needs you used dots + its own words -> now the row's own icon + word + colour (Input/Done/Approval/Request/Failed) via resolveSidebarThreadStatus (needs-1920-sidebar.png); (4) it pushed Search down -> moved below Search, meter stays on top; (5) crossed-out mic on every composer when the helper is off -> always the normal mic, offline only in tooltip/toast. Also: short tooltips (\"Scar Mic isn't running\", \"Mic blocked\"), short settings copy, Test button now matches the field (32px), \"Open on the right\" in its own menu group with its icon (split-1920-0-context-menu-v2.png), archived/deleted panes use the app's Empty (split-1920-state-archived-v2.png), dark theme shots (dark-1920-sidebar.png). Gaps left: chats in Needs you also appear in the list below; split swap/close stay on the divider, not in the pane header; 390 tooltips not looked at."
   }
 ]

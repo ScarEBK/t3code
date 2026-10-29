@@ -102,7 +102,15 @@ export async function transcribeWithHelper(endpoint: string, audio: Blob): Promi
     );
   }
   setStatus(endpoint, "online");
-  const body: unknown = await response.json().catch(() => null);
+  let body: unknown = null;
+  try {
+    body = await response.json();
+  } catch (error) {
+    // The timeout also covers reading the body; don't mistake it for an empty transcript.
+    if (error instanceof Error && error.name === "TimeoutError") {
+      throw new MicTranscribeError("offline", "The speech helper took too long to answer.");
+    }
+  }
   if (!response.ok) {
     const detail =
       typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"

@@ -114,9 +114,6 @@ export function buildThreadActionMenuItems(
   state: ThreadActionMenuState,
 ): ReadonlyArray<ContextMenuItem<ThreadActionMenuId>> {
   const items: ReadonlyArray<ContextMenuItem<ThreadActionMenuId>> = [
-    ...(state.supports.openOnRight
-      ? [{ id: "open-on-right" as const, label: "Open on the right", icon: "columns-2" }]
-      : []),
     ...(state.branch
       ? [
           {
@@ -161,6 +158,16 @@ export function buildThreadActionMenuItems(
                   },
                 ],
               },
+        ]
+      : []),
+    ...(state.supports.openOnRight
+      ? [
+          {
+            id: "open-on-right" as const,
+            label: "Open on the right",
+            icon: "columns-2",
+            separatorBefore: true,
+          },
         ]
       : []),
     { id: "rename", label: "Rename thread", icon: "pencil", separatorBefore: true },

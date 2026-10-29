@@ -3,9 +3,9 @@ import { useLocalStorage } from "~/hooks/useLocalStorage";
 import { DEFAULT_MIC_ENDPOINT } from "./mic/micLogic";
 
 // Fork-only preferences live in localStorage so the shared settings contract stays upstream's.
-export const MIC_ENABLED_KEY = "t3code:fork:mic-enabled";
-export const MIC_ENDPOINT_KEY = "t3code:fork:mic-endpoint";
-export const USAGE_METER_VISIBLE_KEY = "t3code:fork:usage-meter-visible";
+const MIC_ENABLED_KEY = "t3code:fork:mic-enabled";
+const MIC_ENDPOINT_KEY = "t3code:fork:mic-endpoint";
+const USAGE_METER_VISIBLE_KEY = "t3code:fork:usage-meter-visible";
 
 export function useMicEnabled() {
   return useLocalStorage(MIC_ENABLED_KEY, true, Schema.Boolean);

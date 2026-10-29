@@ -1,5 +1,5 @@
 import type { ResolvedKeybindingsConfig } from "@t3tools/contracts";
-import { MicIcon, MicOffIcon } from "lucide-react";
+import { MicIcon } from "lucide-react";
 import { use, useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { BackgroundThreadContext } from "~/components/chat/backgroundThread";
 import { Button } from "~/components/ui/button";
@@ -11,7 +11,7 @@ import { useStableCallback } from "~/hooks/useStableCallback";
 import { shortcutLabelForCommand } from "~/keybindings";
 import { registerCommands } from "~/shortcuts/dispatcher";
 import { useMicEnabled, useMicEndpointSetting } from "../forkSettings";
-import { SplitPaneRoleContext } from "../split/ForkSplitLayout";
+import { SplitPaneRoleContext } from "../split/splitPaneRole";
 import {
   checkMicHelper,
   MicTranscribeError,
@@ -26,7 +26,7 @@ import {
 } from "./micLogic";
 import { startMicRecording, type MicRecording } from "./micRecorder";
 
-export const MIC_COMMAND = "composer.dictate";
+const MIC_COMMAND = "composer.dictate";
 
 type MicPhase = "idle" | "starting" | "recording" | "transcribing";
 
@@ -57,6 +57,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
   const levelRef = useRef<HTMLSpanElement>(null);
   const recordingRef = useRef<MicRecording | null>(null);
   const autoStopRef = useRef<number | null>(null);
+  const unmountedRef = useRef(false);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- probes the external speech helper on mount and whenever the window regains focus
   useEffect(() => {
@@ -68,14 +69,15 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
   }, [endpoint, micEnabled]);
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- releases the microphone if the composer unmounts mid-recording
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
       recordingRef.current?.cancel();
       recordingRef.current = null;
       if (autoStopRef.current !== null) window.clearTimeout(autoStopRef.current);
-    },
-    [],
-  );
+    };
+  }, []);
 
   const writeLevel = (level: number) => {
     levelRef.current?.style.setProperty("--mic-level", level.toFixed(2));
@@ -143,6 +145,11 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
     }
     try {
       const recording = await startMicRecording(writeLevel);
+      if (unmountedRef.current) {
+        // The composer went away while the permission prompt was open: release the mic now.
+        recording.cancel();
+        return;
+      }
       recordingRef.current = recording;
       setBlocked(false);
       setStartedAt(Math.floor(Date.now() / 1000) * 1000);
@@ -219,7 +226,6 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
   });
   const withShortcut = (label: string) => (shortcutLabel ? `${label} (${shortcutLabel})` : label);
   const helperOffline = helperStatus === "offline";
-  const unavailable = disabled || helperOffline;
 
   if (phase === "recording") {
     return (
@@ -227,10 +233,10 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
+              // Same circle as the composer's Interrupt button (ComposerPrimaryActions).
+              <button
                 type="button"
-                variant="destructive"
-                size="icon-sm"
+                className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-destructive/90 text-white shadow-xs shadow-destructive/24 inset-shadow-control-highlight transition-colors duration-150 hover:bg-destructive active:inset-shadow-control-pressed active:shadow-none sm:size-7 [&_svg]:pointer-events-none"
                 onPointerDown={(event) => event.preventDefault()}
                 onClick={toggle}
                 aria-label="Stop dictation"
@@ -254,9 +260,9 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
       : phase === "starting"
         ? "Starting microphone…"
         : helperOffline
-          ? "Speech helper isn't running. Start Scar Mic, then click to retry."
+          ? "Scar Mic isn't running"
           : blocked
-            ? "Microphone access is blocked. Allow it in Windows Settings → Privacy & security → Microphone."
+            ? "Mic blocked"
             : withShortcut("Dictate");
 
   return (
@@ -269,7 +275,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
               variant="ghost"
               size="icon-sm"
               disabled={phase === "transcribing" || phase === "starting"}
-              aria-disabled={unavailable ? true : undefined}
+              aria-disabled={disabled ? true : undefined}
               onPointerDown={(event) => event.preventDefault()}
               onClick={() => {
                 if (disabled) return;
@@ -293,8 +299,6 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
         >
           {phase === "transcribing" || phase === "starting" ? (
             <Spinner size="sm" aria-hidden="true" />
-          ) : helperOffline || blocked ? (
-            <MicOffIcon />
           ) : (
             <MicIcon />
           )}

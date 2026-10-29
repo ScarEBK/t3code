@@ -20,7 +20,7 @@ describe("usageLevel", () => {
 });
 
 describe("pickMeterWindows", () => {
-  it("keeps the 5-hour and first weekly window in that order with the earliest reset", () => {
+  it("keeps the session and first weekly window in that order with the earliest reset", () => {
     expect(
       pickMeterWindows([
         { kind: "weekly", usedPercent: 18.4, resets: [{ at: 900 }, { at: 500 }] },
@@ -29,7 +29,7 @@ describe("pickMeterWindows", () => {
         { kind: "session", usedPercent: 101, resets: [] },
       ]),
     ).toEqual([
-      { key: "session", label: "5-hour", usedPercent: 100, resetsAt: null },
+      { key: "session", label: "Session", usedPercent: 100, resetsAt: null },
       { key: "weekly", label: "Weekly", usedPercent: 18, resetsAt: 500 },
     ]);
   });

@@ -2,11 +2,11 @@ import type { EnvironmentId, ScopedThreadRef, ThreadId } from "@t3tools/contract
 import { scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { useSyncExternalStore } from "react";
 
-export const SPLIT_STORAGE_KEY = "t3code:fork:split-view";
+const SPLIT_STORAGE_KEY = "t3code:fork:split-view";
 export const SPLIT_WIDTH_STORAGE_KEY = "t3code:fork:split-right-width";
 /** Below this main-area width two chats don't fit; above PHONE it says so instead of hiding. */
-export const SPLIT_MIN_WIDTH = 960;
-export const SPLIT_PHONE_WIDTH = 640;
+const SPLIT_MIN_WIDTH = 960;
+const SPLIT_PHONE_WIDTH = 640;
 export const SPLIT_PANE_MIN_WIDTH = 420;
 
 export type SplitLayoutMode = "split" | "too-narrow" | "phone";

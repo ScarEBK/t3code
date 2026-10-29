@@ -18,7 +18,8 @@ export function allowMediaForAppWindow(webContents: Electron.WebContents): void 
   });
 
   const session = webContents.session;
-  if (configuredSessions.has(session)) return;
+  // Test doubles of BrowserWindow carry no session.
+  if (session == null || configuredSessions.has(session)) return;
   configuredSessions.add(session);
   session.setPermissionRequestHandler((contents, permission, callback) => {
     callback(permission === "media" ? isMediaAllowed(contents?.id) : true);

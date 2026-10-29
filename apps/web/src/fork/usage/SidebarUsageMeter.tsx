@@ -1,4 +1,5 @@
 import { useAtomValue } from "@effect/atom-react";
+import { ProviderDriverKind } from "@t3tools/contracts";
 import { refreshUsageLimits } from "@t3tools/client-runtime/state/usage";
 import {
   collectLimitAccounts,
@@ -8,6 +9,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { CircleAlertIcon } from "lucide-react";
 import { useEffect } from "react";
+import { barColor } from "~/components/usage/UsageLimits";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
 import { useNowMinute } from "~/hooks/useNowMinute";
@@ -28,12 +30,7 @@ import {
 
 const FIXTURE_KEY = "t3code:fork:usage-fixture";
 
-const LEVEL_BAR_CLASS = {
-  normal: "bg-foreground/55",
-  warning: "bg-warning",
-  critical: "bg-destructive",
-} as const;
-
+// Bars match the Usage page (remaining, provider colour at 35%); only the number turns amber/red.
 const LEVEL_TEXT_CLASS = {
   normal: "text-foreground",
   warning: "text-warning-foreground",
@@ -61,7 +58,7 @@ function readFixture(now: number): MeterState | null {
       windows: [
         {
           key: "session",
-          label: "5-hour",
+          label: "Session",
           usedPercent: fixture.session ?? 0,
           resetsAt: now + 2.2 * 3_600_000,
         },
@@ -176,7 +173,7 @@ function SidebarUsageMeterContent() {
               <span className="text-foreground">Claude usage</span>
               {state.windows.map((window) => (
                 <span key={window.key} className="text-muted-foreground tabular-nums">
-                  {window.label}: {window.usedPercent}% used
+                  {window.label}: {100 - window.usedPercent}% left
                   {window.resetsAt !== null
                     ? ` · resets ${formatResetClock(window.resetsAt)} ET`
                     : ""}
@@ -195,23 +192,26 @@ function SidebarUsageMeterContent() {
   );
 }
 
+const BAR_COLOR = barColor(ProviderDriverKind.make(METER_DRIVER));
+
 function MeterRow({ window, now }: { readonly window: MeterWindow; readonly now: number }) {
   const level = usageLevel(window.usedPercent);
+  const remaining = 100 - window.usedPercent;
   return (
     <span className="flex flex-col gap-1">
       <span className="flex items-baseline gap-1.5 text-xs tabular-nums">
         <span className="text-muted-foreground">{window.label}</span>
         <span className={cn("ms-auto font-medium", LEVEL_TEXT_CLASS[level])}>
-          {window.usedPercent}% used
+          {remaining}% left
         </span>
         {window.resetsAt !== null ? (
           <span className="text-muted-foreground">· {formatDuration(window.resetsAt - now)}</span>
         ) : null}
       </span>
-      <span className="relative h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+      <span className="relative h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
         <span
-          className={cn("absolute inset-y-0 left-0 rounded-full", LEVEL_BAR_CLASS[level])}
-          style={{ width: `${window.usedPercent}%` }}
+          className="absolute inset-y-0 left-0 rounded-full opacity-35"
+          style={{ width: `${remaining}%`, backgroundColor: BAR_COLOR }}
         />
       </span>
     </span>
@@ -225,7 +225,7 @@ function MeterSkeletonRow() {
         <Skeleton className="h-3 w-12" />
         <Skeleton className="h-3 w-20" />
       </span>
-      <Skeleton className="h-1 w-full" />
+      <Skeleton className="h-1.5 w-full" />
     </span>
   );
 }

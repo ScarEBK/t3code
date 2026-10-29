@@ -1,10 +1,10 @@
 import type { ServerProviderUsageLimits, ServerProviderUsageWindow } from "@t3tools/contracts";
 
-export const USAGE_WARNING_PERCENT = 75;
-export const USAGE_CRITICAL_PERCENT = 90;
+const USAGE_WARNING_PERCENT = 75;
+const USAGE_CRITICAL_PERCENT = 90;
 export const METER_DRIVER = "claudeAgent";
 // Scar's clock: the PC runs on Pacific time but Scar lives in Ohio.
-export const METER_TIME_ZONE = "America/New_York";
+const METER_TIME_ZONE = "America/New_York";
 
 export type UsageLevel = "normal" | "warning" | "critical";
 
@@ -33,7 +33,7 @@ interface PoolWindowLike {
   readonly resets: ReadonlyArray<{ readonly at: number }>;
 }
 
-const WINDOW_LABEL = { session: "5-hour", weekly: "Weekly" } as const;
+const WINDOW_LABEL = { session: "Session", weekly: "Weekly" } as const;
 
 export function pickMeterWindows(windows: readonly PoolWindowLike[]): MeterWindow[] {
   const picked: MeterWindow[] = [];
@@ -52,7 +52,7 @@ export function pickMeterWindows(windows: readonly PoolWindowLike[]): MeterWindo
 }
 
 export interface MeterInput {
-  /** Some environment is still connecting or hasn't sent its config yet. */
+  /** Every environment is still connecting or hasn't sent its config yet. */
   readonly pending: boolean;
   readonly providers: ReadonlyArray<{
     readonly enabled: boolean;

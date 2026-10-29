@@ -1,20 +1,18 @@
 #!/usr/bin/env node
-// Scar's fork: rebase the current branch onto upstream main in one command.
-//   node scripts/fork-sync.ts           rebase onto upstream/main
-//   node scripts/fork-sync.ts --merge   merge upstream/main instead (keeps history, no force-push)
-//   node scripts/fork-sync.ts --check   only report how far behind upstream the branch is
-// FORK.md lists the upstream files the fork edits; conflicts can only land in those.
-import { execFileSync, spawnSync } from "node:child_process";
+// @effect-diagnostics nodeBuiltinImport:off globalConsole:off - a tiny git wrapper run by hand.
+// Fork: take upstream main in one command (`vp run fork:sync [-- --merge|--check]`).
+// Conflicts can only land in the upstream files FORK.md lists.
+import * as NodeChildProcess from "node:child_process";
 
 const UPSTREAM_URL = "https://github.com/pingdotgg/t3code.git";
 const args = new Set(process.argv.slice(2));
 
 function git(...gitArgs: string[]): string {
-  return execFileSync("git", gitArgs, { encoding: "utf8" }).trim();
+  return NodeChildProcess.execFileSync("git", gitArgs, { encoding: "utf8" }).trim();
 }
 
 function run(...gitArgs: string[]): number {
-  return spawnSync("git", gitArgs, { stdio: "inherit" }).status ?? 1;
+  return NodeChildProcess.spawnSync("git", gitArgs, { stdio: "inherit" }).status ?? 1;
 }
 
 const remotes = git("remote").split(/\r?\n/);

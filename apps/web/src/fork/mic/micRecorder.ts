@@ -24,10 +24,17 @@ export async function startMicRecording(onLevel: (level: number) => void): Promi
     if (event.data.size > 0) chunks.push(event.data);
   });
 
-  const audioContext = new AudioContext();
-  const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 512;
-  audioContext.createMediaStreamSource(stream).connect(analyser);
+  let audioContext: AudioContext;
+  let analyser: AnalyserNode;
+  try {
+    audioContext = new AudioContext();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 512;
+    audioContext.createMediaStreamSource(stream).connect(analyser);
+  } catch (error) {
+    for (const track of stream.getTracks()) track.stop();
+    throw error;
+  }
   const samples = new Uint8Array(analyser.fftSize);
   const levelTimer = window.setInterval(() => {
     analyser.getByteTimeDomainData(samples);

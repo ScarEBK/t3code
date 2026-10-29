@@ -36,7 +36,7 @@ export function ForkGeneralSettings() {
       <SettingsSection id="fork-dictation" title="Dictation">
         <SettingsRow
           title="Mic button"
-          description="Show a mic next to attach in the message box. Click it, or press the shortcut, to talk instead of type."
+          description="Mic next to Attach in the message box."
           control={
             <Switch
               checked={micEnabled}
@@ -50,7 +50,7 @@ export function ForkGeneralSettings() {
           description={
             endpointInvalid
               ? `Not a valid http(s) address, so ${DEFAULT_MIC_ENDPOINT} is used.`
-              : "Local speech-to-text server. It gets the recording at /transcribe and answers with the text."
+              : "Address of Scar Mic, the local speech-to-text app."
           }
           status={
             micEnabled ? (
@@ -91,7 +91,6 @@ export function ForkGeneralSettings() {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 onClick={() => void checkMicHelper(endpoint, { force: true })}
               >
                 Test
@@ -104,7 +103,7 @@ export function ForkGeneralSettings() {
       <SettingsSection id="fork-usage-meter" title="Usage meter">
         <SettingsRow
           title="Show usage in the sidebar"
-          description="Keep the 5-hour and weekly limit bars at the top of the sidebar. Click them to open Usage."
+          description="Claude session and weekly limits at the top of the sidebar."
           control={
             <Switch
               checked={usageMeterVisible}
