@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
 import { useNowMinute } from "~/hooks/useNowMinute";
+import { useStableCallback } from "~/hooks/useStableCallback";
 import { cn } from "~/lib/utils";
 import { environmentPresentations } from "~/state/presentation";
 import { serverEnvironment } from "~/state/server";
@@ -92,9 +93,7 @@ function useMeterState(now: number): MeterState {
     (candidate) => candidate.driver === METER_DRIVER,
   );
   const state = deriveMeterState({
-    pending:
-      entries.length === 0 ||
-      entries.every(([, presentation]) => presentation.serverConfig === null),
+    pending: entries.every(([, presentation]) => presentation.serverConfig === null),
     providers,
     poolWindows: pool?.windows ?? null,
   });
@@ -112,9 +111,7 @@ function useMeterState(now: number): MeterState {
     )
     .map(([environmentId]) => environmentId);
   const unprobedKey = unprobed.join(",");
-  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- asks a connected server for Claude's limits once when none were probed yet; shares the Usage page's 5-minute throttle
-  useEffect(() => {
-    if (unprobedKey.length === 0) return;
+  const probeUnprobed = useStableCallback(() => {
     for (const environmentId of unprobed) {
       void refreshUsageLimits(
         environmentId,
@@ -122,8 +119,11 @@ function useMeterState(now: number): MeterState {
         true,
       ).catch(() => undefined);
     }
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- keyed by the joined ids
-  }, [unprobedKey]);
+  });
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- asks a connected server for Claude's limits once when none were probed yet; shares the Usage page's 5-minute throttle
+  useEffect(() => {
+    if (unprobedKey.length > 0) probeUnprobed();
+  }, [unprobedKey, probeUnprobed]);
 
   return readFixture(now) ?? state;
 }
@@ -135,8 +135,8 @@ export function SidebarUsageMeter() {
 }
 
 function SidebarUsageMeterContent() {
-  useNowMinute();
-  const now = Date.now();
+  // minuteTick is the UTC ISO minute, so this is "now" to the minute without an impure call.
+  const now = Date.parse(`${useNowMinute()}:00Z`);
   const state = useMeterState(now);
   const navigate = useNavigate();
   if (state.kind === "hidden") return null;
