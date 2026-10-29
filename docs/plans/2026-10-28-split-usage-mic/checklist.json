@@ -3,22 +3,22 @@
     "id": "split-open",
     "what": "Open a chat on the right via sidebar right-click, drag-and-drop and keybinding",
     "proof": "screenshot at 1920 of two chats side by side, path + what it shows; each composer sends to its own thread (thread ids in the log)",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "fork/split/ForkSplitLayout.tsx wraps the routed chat (one line in ThreadRouteView.tsx). Ways in, all run 2026-10-28 in the sandbox app at 1920: (1) sidebar right-click -> 'Open on the right' (C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-0-context-menu.png shows the item first in the menu), (2) drag a chat out of the sidebar onto the chat area (C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-9-drag-over.png shows the dashed 'Drop to open on the right' zone under the drag ghost; after drop localStorage split = mcp:b43f7c27 'Refactor auth flow', split-1920-10-dropped.png), (3) Ctrl+Alt+S opened the previous chat on the right and pressed again closed it, (4) middle-click -> right = mcp:b43f7c27, Alt-click -> right = mcp:cd6ee2c6. C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-2-sent-both.png: 'Fix the checkout button' left, 'Write the launch post' right, each with its own composer. Typed in each composer + Enter; server check 'node apps/server/src/bin.ts thread show --base-dir .t3 <id>': mcp:ca5b4ddc (left) -> 'hello from the LEFT pane', mcp:83a2aafc (right) -> 'hello from the RIGHT pane'."
   },
   {
     "id": "split-controls",
     "what": "Resize divider, swap, close; split survives an app restart",
     "proof": "screenshots before/after resize and after restart, paths + what they show",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "Resize: dragged the divider 250px left -> right pane width 832 -> 1086, stored in localStorage t3code:fork:split-right-width (C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-3-before-resize.png vs split-1920-4-after-resize.png). Restart: a brand-new Chromium process with the saved profile reopened with the split restored, and after a reload the width stayed 1086 (C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-5-after-restart.png). Swap: 'Swap sides' moved the right chat to the route (URL -> mcp:83a2aafc) and the old left chat to the right (C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-6-swapped.png). Close: 'Close right chat' -> secondary pane count 0. Tests: splitViewStore.test.ts passed."
   },
   {
     "id": "split-states",
     "what": "Right chat loading / deleted / archived; window too narrow; 390 web width shows one chat and nothing breaks",
     "proof": "one screenshot per state, 390 shot included",
-    "status": "not_started",
-    "evidence": ""
+    "status": "passing",
+    "evidence": "Loading: C:/Users/Administrator/Desktop/Code/t3code-proof/shots/split-1920-state-early.png (spinner 'Loading chat…', data-fork-split-state=loading at t+0.4s). Deleted/missing chat: split-1920-state-missing.png ('This chat was deleted.' + Close right side, state=deleted at t+6s). Archived (archived 'Plan the Discord bot' via the menu, then pinned it right): split-1920-state-archived.png ('This chat is archived.' + Close). Window too narrow (1180px window): split-1180-too-narrow.png, one chat + 'Split hidden, window too small ×' pill. Phone 390: split-390-phone.png, one chat, no pill, nothing broken; back at 1920 the split returned (state=ready). splitLayoutMode tests (960/640 edges) passed."
   },
   {
     "id": "needs-you",

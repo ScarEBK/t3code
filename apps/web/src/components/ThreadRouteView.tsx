@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import ChatView from "./ChatView";
+import { ForkSplitLayout } from "~/fork/split/ForkSplitLayout";
 import { BackgroundThreadContext } from "./chat/backgroundThread";
 import { SidebarInset } from "./ui/sidebar";
 import { useComposerDraftStore } from "../composerDraftStore";
@@ -153,7 +154,9 @@ export function ThreadRouteView({
       className="h-svh min-h-0 overflow-hidden overscroll-y-none md:h-dvh"
       inert={background}
     >
-      <BackgroundThreadContext value={background}>{view}</BackgroundThreadContext>
+      <ForkSplitLayout primaryRef={serverThreadRef} background={background}>
+        <BackgroundThreadContext value={background}>{view}</BackgroundThreadContext>
+      </ForkSplitLayout>
       {background ? null : redirect}
     </SidebarInset>
   );

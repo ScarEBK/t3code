@@ -1,5 +1,6 @@
 import { attachSidebarTree, SIDEBAR_TREE_PROPS } from "../lib/sidebarTree";
 import { SidebarUsageMeter } from "~/fork/usage/SidebarUsageMeter";
+import { openThreadOnRight } from "~/fork/split/splitViewStore";
 import { type EnvironmentId, type ScopedProjectRef } from "@t3tools/contracts";
 import type { EnvironmentServerConfig } from "@t3tools/client-runtime/connection";
 import { ThreadContextDragGhost } from "./chat/ThreadContextDragGhost";
@@ -1498,6 +1499,11 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
     const isMac = isMacPlatform(navigator.platform);
     const isModClick = isMac ? event.metaKey : event.ctrlKey;
     const threadKey = scopedThreadKey(threadRef);
+    if (event.button === 1 || event.altKey) {
+      event.preventDefault();
+      openThreadOnRight(threadRef);
+      return;
+    }
     if (isModClick) {
       event.preventDefault();
       toggleThreadSelection(threadKey);
@@ -2565,6 +2571,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                 snooze: configLoaded,
                 pinning: configLoaded,
                 titleRegeneration: configLoaded,
+                openOnRight: true,
               },
               snoozePresets,
             }),
@@ -2707,6 +2714,9 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
             return;
           case "copy-thread-id":
             copyThreadIdToClipboard(thread.id, { threadId: thread.id });
+            return;
+          case "open-on-right":
+            openThreadOnRight(threadRef);
             return;
           case "archive": {
             if (confirmThreadArchive) {

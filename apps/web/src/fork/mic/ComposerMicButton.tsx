@@ -11,6 +11,7 @@ import { useStableCallback } from "~/hooks/useStableCallback";
 import { shortcutLabelForCommand } from "~/keybindings";
 import { registerCommands } from "~/shortcuts/dispatcher";
 import { useMicEnabled, useMicEndpointSetting } from "../forkSettings";
+import { SplitPaneRoleContext } from "../split/ForkSplitLayout";
 import {
   checkMicHelper,
   MicTranscribeError,
@@ -26,7 +27,6 @@ import {
 import { startMicRecording, type MicRecording } from "./micRecorder";
 
 export const MIC_COMMAND = "composer.dictate";
-export const SPLIT_SECONDARY_PANE_SELECTOR = "[data-fork-split-pane='secondary']";
 
 type MicPhase = "idle" | "starting" | "recording" | "transcribing";
 
@@ -49,6 +49,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
   const endpoint = resolveMicEndpoint(endpointSetting);
   const helperStatus = useMicHelperStatus(endpoint);
   const backgroundThread = use(BackgroundThreadContext);
+  const splitRole = use(SplitPaneRoleContext);
   const [phase, setPhase] = useState<MicPhase>("idle");
   const [blocked, setBlocked] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -183,7 +184,8 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
 
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- registers the dictation shortcut with the command registry while this composer is mounted
   useEffect(() => {
-    if (backgroundThread || !micEnabled) return;
+    // The split's right pane runs in background mode but still owns its own mic.
+    if ((backgroundThread && splitRole !== "secondary") || !micEnabled) return;
     return registerCommands(
       {
         [MIC_COMMAND]: (event) => {
@@ -199,7 +201,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
           // Newest scope runs first: pass to the other composer when it owns focus, or when
           // neither does and this one is the split's secondary pane.
           if (focusInOtherComposer) return false;
-          if (!focusInThisComposer && root.closest(SPLIT_SECONDARY_PANE_SELECTOR)) return false;
+          if (!focusInThisComposer && splitRole === "secondary") return false;
           event.preventDefault();
           event.stopPropagation();
           toggle();
@@ -208,7 +210,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
       },
       { capture: true },
     );
-  }, [backgroundThread, micEnabled, toggle]);
+  }, [backgroundThread, micEnabled, splitRole, toggle]);
 
   if (!micEnabled) return null;
 
