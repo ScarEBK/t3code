@@ -735,7 +735,7 @@ export const BranchToolbar = memo(function BranchToolbar({
 
   if (layout === "header") {
     const pillClassName =
-      "hidden h-7 min-w-0 max-w-52 shrink-0 items-center rounded-full bg-accent px-1 @md/chat-header:flex [-webkit-app-region:no-drag]";
+      "hidden h-7 min-w-0 max-w-52 shrink-0 items-center rounded-full bg-accent px-1 @2xl/chat-header:flex [-webkit-app-region:no-drag]";
     return (
       <div className="group/composer-context contents text-muted-foreground text-xs font-normal">
         {showEnvironmentIndicator && availableEnvironments ? (

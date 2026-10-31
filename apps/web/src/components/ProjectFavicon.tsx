@@ -1,4 +1,5 @@
 import type { EnvironmentProject } from "@t3tools/client-runtime/state/shell";
+import type { ProjectIconColor } from "@t3tools/contracts";
 import {
   getProjectFaviconResourceKey,
   isProjectFaviconFallbackUrl,
@@ -9,6 +10,7 @@ import { createElement, lazy, Suspense, useState } from "react";
 import { useAtomValue } from "@effect/atom-react";
 import { projectFaviconUrlAtom } from "../state/assets";
 import { deriveProjectIdentity } from "../projectIdentity";
+import { isTintOnlyProjectIcon } from "../fork/projectTint";
 import { projectIconColorClassName } from "../projectIconColors";
 import { ProjectMonogram } from "./ProjectMonogram";
 import { cn } from "~/lib/utils";
@@ -39,7 +41,9 @@ export function ProjectFavicon(input: {
 }) {
   const { project } = input;
   // A chosen logo file wins, which leaves the icon's color free to act as the project's tint.
-  if (project.faviconPath) return <AutomaticProjectFavicon {...input} />;
+  if (project.faviconPath || isTintOnlyProjectIcon(project)) {
+    return <AutomaticProjectFavicon {...input} />;
+  }
   if (project.projectIcon?.kind === "monogram") {
     return (
       <ProjectMonogram
@@ -89,6 +93,10 @@ function AutomaticProjectFavicon(input: Parameters<typeof ProjectFavicon>[0]) {
     }),
   );
   const FallbackIcon = input.fallbackIcon ?? FolderCodeIcon;
+  const fallbackColor =
+    project.projectIcon && project.projectIcon.kind !== "emoji"
+      ? project.projectIcon.color
+      : undefined;
 
   if (!src || isProjectFaviconFallbackUrl(src)) {
     return (
@@ -96,6 +104,7 @@ function AutomaticProjectFavicon(input: Parameters<typeof ProjectFavicon>[0]) {
         className={input.className}
         icon={FallbackIcon}
         projectName={project.title}
+        color={fallbackColor}
       />
     );
   }
@@ -113,6 +122,7 @@ function AutomaticProjectFavicon(input: Parameters<typeof ProjectFavicon>[0]) {
       className={input.className}
       fallbackIcon={FallbackIcon}
       fallbackProjectName={project.title}
+      fallbackColor={fallbackColor}
     />
   );
 }
@@ -122,16 +132,22 @@ function ProjectFaviconFallback({
   icon: Icon,
   emoji,
   projectName,
+  color,
 }: {
   readonly className?: string | undefined;
   readonly icon: ComponentType<{ className?: string }>;
   readonly emoji?: string | undefined;
   readonly projectName?: string | undefined;
+  readonly color?: ProjectIconColor | undefined;
 }) {
   if (projectName && projectName.trim().length > 0) {
     const identity = deriveProjectIdentity(projectName);
     return (
-      <ProjectMonogram text={identity.monogram} color={identity.color} className={className} />
+      <ProjectMonogram
+        text={identity.monogram}
+        color={color ?? identity.color}
+        className={className}
+      />
     );
   }
 
@@ -157,11 +173,13 @@ function ProjectFaviconImage({
   className,
   fallbackIcon: FallbackIcon,
   fallbackProjectName,
+  fallbackColor,
 }: {
   readonly src: string;
   readonly className?: string | undefined;
   readonly fallbackIcon: ComponentType<{ className?: string }>;
   readonly fallbackProjectName?: string | undefined;
+  readonly fallbackColor?: ProjectIconColor | undefined;
 }) {
   const [displayedSrc, setDisplayedSrc] = useState<string | null>(() =>
     src.startsWith("data:image/") ? src : null,
@@ -178,6 +196,7 @@ function ProjectFaviconImage({
           className={className}
           icon={FallbackIcon}
           projectName={fallbackProjectName}
+          color={fallbackColor}
         />
       ) : null}
       {displayedSrc ? (

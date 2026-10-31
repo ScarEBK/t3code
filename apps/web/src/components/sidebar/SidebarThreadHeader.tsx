@@ -20,7 +20,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { updateClientSettings, useBoringSidebarEnabled } from "~/hooks/useSettings";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
-import { SidebarInput, SidebarMenuButton } from "../ui/sidebar";
+import { SidebarInput, SidebarMenuButton, useSidebar } from "../ui/sidebar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { SidebarNavLinks } from "./SidebarChrome";
 
@@ -158,6 +158,7 @@ export function SidebarThreadListControls({
   onNewProject: () => void;
 }) {
   const navigate = useNavigate();
+  const { isMobile, setOpenMobile } = useSidebar();
   return (
     <div className="flex items-center gap-0.5 pt-2.5 pb-1">
       <SidebarGroupingSwitch />
@@ -172,7 +173,10 @@ export function SidebarThreadListControls({
         ) : null}
         <SidebarHeaderIconButton
           label="Archived threads"
-          onClick={() => void navigate({ to: "/settings/archived" })}
+          onClick={() => {
+            if (isMobile) setOpenMobile(false);
+            void navigate({ to: "/settings/archived" });
+          }}
         >
           <ArchiveIcon />
         </SidebarHeaderIconButton>

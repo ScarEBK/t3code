@@ -13,6 +13,13 @@ export function resolveProjectTint(project: TintProject): ProjectIconColor {
   return icon && icon.kind !== "emoji" ? icon.color : deriveProjectIdentity(project.title).color;
 }
 
+// Picking a tint on a project with no chosen icon stores its automatic letters just to hold the
+// color. Those letters must not hide a logo found in the project's folder.
+export function isTintOnlyProjectIcon(project: TintProject): boolean {
+  const icon = project.projectIcon;
+  return icon?.kind === "monogram" && icon.text === deriveProjectIdentity(project.title).monogram;
+}
+
 export function projectTintProps(project: TintProject | null | undefined) {
   const color = project ? resolveProjectTint(project) : "gray";
   if (color === "gray") return {};

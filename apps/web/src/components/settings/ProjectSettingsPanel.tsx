@@ -524,7 +524,7 @@ function ProjectDetail({
             title="Thread tint"
             description={
               projectIcon?.kind === "emoji" && !faviconPath
-                ? "Emoji icons have no color. Choose another icon to pick a tint."
+                ? "Emoji icons get an automatic tint. Choose another icon to pick one."
                 : "Colors this project's threads in the sidebar. Gray turns it off."
             }
             control={

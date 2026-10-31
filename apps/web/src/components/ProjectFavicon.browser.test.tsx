@@ -55,6 +55,10 @@ it("only activates the favicon resource after removing a custom icon", async () 
     expect(activeResources.size).toBe(0);
     await screen.rerender(view(project.projectIcon, "icon.png"));
     expect(activeResources.size).toBe(1);
+    await screen.rerender(view(project.projectIcon));
+    expect(activeResources.size).toBe(0);
+    await screen.rerender(view({ kind: "monogram", text: "PT", color: "blue" }));
+    expect(activeResources.size).toBe(1);
   } finally {
     registry.dispose();
   }

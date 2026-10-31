@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-10-31 17:46 Ohio: Z Code look and project tints approved, push it
+
+"Okay, cool. Yeah, I do kinda like that to be honest with you. Just push that. I do like it a lot."
+
 ## 2026-10-31 17:16 Ohio: Session rows: project logo and a color tint per project
 
 "Wait, from the screenshot, that looks really, really good, honestly. Definitely what I'm looking for. Now, there's definitely a couple things that I'm not really too happy with. For example, next to a session that is working, for example, like, I would love to see like a SVG example of our 5Hub Motion Life, you know, I'm saying. And the specific card itself, like, or the button itself, if you could like, maybe like, a little bit of a tint of like a specific color which you can assign if you would like. If you for example for a specific project, you can assign it like a specific tint or color which you know, I'm saying if I, yeah, I'm saying, take a look at it, I will know exactly what it is. And as for the background itself, I honestly, it's fine for now. I don't really mind that. But yeah, just fix that, and I think, I don't know, I would like to see it after that's done basically."

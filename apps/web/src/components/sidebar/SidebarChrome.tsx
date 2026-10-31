@@ -76,10 +76,12 @@ export const SidebarChromeHeader = memo(function SidebarChromeHeader({
         />
       </div>
       <div className="relative z-10 flex h-8 min-w-0 flex-1 flex-wrap content-start items-center gap-x-2 overflow-hidden py-0.5">
-        <div className="ml-[var(--workspace-titlebar-content-left)] hidden shrink-0 items-center md:flex">
-          <HistoryNavigationButton direction="back" onBackdrop={backdropVariant !== null} />
-          <HistoryNavigationButton direction="forward" onBackdrop={backdropVariant !== null} />
-        </div>
+        {"navigation" in window ? (
+          <div className="ml-[var(--workspace-titlebar-content-left)] hidden shrink-0 items-center md:flex">
+            <HistoryNavigationButton direction="back" onBackdrop={backdropVariant !== null} />
+            <HistoryNavigationButton direction="forward" onBackdrop={backdropVariant !== null} />
+          </div>
+        ) : null}
         {pillLabel ? (
           <div className="ml-1 flex h-7 items-center">
             <Badge data-environment-identification="pill" size="sm" variant="secondary">
