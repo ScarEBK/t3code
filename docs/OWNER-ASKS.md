@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-10-31 Ohio: Checklist panel inside the new look
+
+"Alright, so it just got done with the redesign on Claude. It looks really nice. So maybe you have to make something within this design, you know what I'm saying? Use real PNGs or SVGs, whatever you're gonna call it. Things that basically make sense, and see how you're gonna plug it in correctly with this new version."
+
 ## 2026-10-31 17:46 Ohio: Z Code look and project tints approved, push it
 
 "Okay, cool. Yeah, I do kinda like that to be honest with you. Just push that. I do like it a lot."
