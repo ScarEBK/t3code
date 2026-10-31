@@ -153,6 +153,16 @@ html[data-mobile-composer-route-transition="true"]::view-transition-old(t3-mobil
 
 /* The main panel floats 4px inside the window, so its own topbar is 8px shorter and starts 4px
    lower. That keeps panel controls on the same line as the sidebar's. */
+/* An image layer so hover and selected colors still stack under the project's tint. */
+@layer components {
+  [data-project-tint] {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--project-tint) 13%, transparent),
+      color-mix(in srgb, var(--project-tint) 13%, transparent)
+    );
+  }
+}
+
 @media (min-width: 48rem) {
   [data-app-sidebar] {
     border-right-width: 0;

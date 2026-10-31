@@ -15,14 +15,16 @@ import {
   resolveSidebarThreadStatus,
   resolveThreadLastVisitedAt,
 } from "~/components/Sidebar.logic";
+import { ProjectFavicon } from "~/components/ProjectFavicon";
 import { CollapsibleSectionHeader } from "~/components/ui/collapsible-section-header";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
 import { useLocalStorage } from "~/hooks/useLocalStorage";
 import { useThreadRouteTarget } from "~/hooks/useThreadRouteTarget";
 import { cn } from "~/lib/utils";
-import { useQuietThreadShells } from "~/state/entities";
+import { useProjects, useQuietThreadShells } from "~/state/entities";
 import { buildThreadRouteParams } from "~/threadRoutes";
 import { useUiStateStore } from "~/uiStateStore";
+import { projectTintProps } from "../projectTint";
 import { openThreadOnRight, sameThreadRef, useSplitRightThread } from "../split/splitViewStore";
 import { collectNeedsYou, needsYouKind, type NeedsYouKind } from "./needsYouLogic";
 
@@ -49,6 +51,7 @@ const KIND_STATUS: Record<
 export function SidebarNeedsYou() {
   const router = useRouter();
   const threads = useQuietThreadShells();
+  const projects = useProjects();
   const localVisits = useUiStateStore((state) => state.threadLastVisitedAtById);
   const routeTarget = useThreadRouteTarget();
   const rightRef = useSplitRightThread();
@@ -66,7 +69,14 @@ export function SidebarNeedsYou() {
       );
       return {
         key,
-        value: { ref, title: thread.title },
+        value: {
+          ref,
+          title: thread.title,
+          project: projects.find(
+            (project) =>
+              project.environmentId === thread.environmentId && project.id === thread.projectId,
+          ),
+        },
         kind,
         updatedAt: thread.updatedAt,
         archived: thread.archivedAt !== null,
@@ -114,9 +124,13 @@ export function SidebarNeedsYou() {
                         }}
                         className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 text-left text-sm outline-none hover:bg-sidebar-row-hover focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                         data-needs-you={item.kind}
+                        {...projectTintProps(item.value.project)}
                       />
                     }
                   >
+                    {item.value.project ? (
+                      <ProjectFavicon project={item.value.project} className="size-4.5 shrink-0" />
+                    ) : null}
                     <span className="min-w-0 flex-1 truncate">{item.value.title}</span>
                     <span
                       className={cn(

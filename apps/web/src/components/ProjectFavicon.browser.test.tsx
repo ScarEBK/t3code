@@ -31,12 +31,15 @@ it("only activates the favicon resource after removing a custom icon", async () 
     environmentId: EnvironmentId.make("test"),
     workspaceRoot: "/project",
     title: "Project",
-    faviconPath: "icon.png",
+    faviconPath: null,
     projectIcon: { kind: "monogram", text: "PR", color: "blue" },
   };
-  const view = (projectIcon: ProjectFaviconProject["projectIcon"]) => (
+  const view = (
+    projectIcon: ProjectFaviconProject["projectIcon"],
+    faviconPath: ProjectFaviconProject["faviconPath"] = null,
+  ) => (
     <RegistryContext value={registry}>
-      <ProjectFavicon project={{ ...project, projectIcon }} />
+      <ProjectFavicon project={{ ...project, projectIcon, faviconPath }} />
     </RegistryContext>
   );
   try {
@@ -49,7 +52,8 @@ it("only activates the favicon resource after removing a custom icon", async () 
     await screen.rerender(view(null));
     expect(activeResources.size).toBe(1);
     await screen.rerender(view(project.projectIcon));
-    await screen.rerender(view(null));
+    expect(activeResources.size).toBe(0);
+    await screen.rerender(view(project.projectIcon, "icon.png"));
     expect(activeResources.size).toBe(1);
   } finally {
     registry.dispose();

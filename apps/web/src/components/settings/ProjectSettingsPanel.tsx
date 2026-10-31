@@ -51,7 +51,10 @@ import {
   projectGroupTitleNeedsUpdate,
   SCRATCH_PROJECT_TITLE,
 } from "./ProjectSettingsPanel.logic";
+import { cn } from "~/lib/utils";
 import { useSettingsProjectGroups } from "./useSettingsProjectGroups";
+import { resolveProjectTint, withProjectTint } from "../../fork/projectTint";
+import { PROJECT_ICON_COLORS } from "../../projectIconColors";
 import { readUnloadedThreadCount } from "../../state/olderSettledShelf";
 import { settingsScopeEnvironmentLabels } from "./settingsScopeAxis";
 
@@ -472,13 +475,15 @@ function ProjectDetail({
           <SettingsRow
             title="Project icon"
             description={
-              projectIcon?.kind === "lucide"
-                ? `${projectIcon.name} · ${projectIcon.color}`
-                : projectIcon?.kind === "monogram"
-                  ? `${projectIcon.text} · ${projectIcon.color}`
-                  : projectIcon?.kind === "emoji"
-                    ? projectIcon.emoji
-                    : (faviconPath ?? "Automatic")
+              faviconPath
+                ? faviconPath
+                : projectIcon?.kind === "lucide"
+                  ? `${projectIcon.name} · ${projectIcon.color}`
+                  : projectIcon?.kind === "monogram"
+                    ? `${projectIcon.text} · ${projectIcon.color}`
+                    : projectIcon?.kind === "emoji"
+                      ? projectIcon.emoji
+                      : "Automatic"
             }
             resetAction={
               group.memberProjects.some((member) => !hasDefaultProjectIcon(member)) ? (
@@ -512,6 +517,49 @@ function ProjectDetail({
                 >
                   Choose file
                 </Button>
+              </div>
+            }
+          />
+          <SettingsRow
+            title="Thread tint"
+            description={
+              projectIcon?.kind === "emoji" && !faviconPath
+                ? "Emoji icons have no color. Choose another icon to pick a tint."
+                : "Colors this project's threads in the sidebar. Gray turns it off."
+            }
+            control={
+              <div
+                className="flex max-w-72 flex-wrap justify-end gap-1"
+                role="group"
+                aria-label="Thread tint"
+              >
+                {PROJECT_ICON_COLORS.map((option) => {
+                  const selected = resolveProjectTint(representative) === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      aria-label={option.label}
+                      aria-pressed={selected}
+                      disabled={
+                        isSavingFavicon ||
+                        !canEditGroup ||
+                        (projectIcon?.kind === "emoji" && !faviconPath)
+                      }
+                      className={cn(
+                        "flex size-6 items-center justify-center rounded-full border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-50",
+                        selected && "border-foreground/64",
+                      )}
+                      onClick={() =>
+                        void setProjectIcon({
+                          projectIcon: withProjectTint(representative, option.value),
+                        })
+                      }
+                    >
+                      <span className={cn("size-4 rounded-full", option.swatchClassName)} />
+                    </button>
+                  );
+                })}
               </div>
             }
           />
@@ -608,7 +656,12 @@ function ProjectDetail({
         {...(pickProjectFavicon
           ? { onPickExternal: () => pickProjectFavicon(representative.workspaceRoot) }
           : {})}
-        onSelect={(path) => void setProjectIcon({ faviconPath: path, projectIcon: null })}
+        onSelect={(path) =>
+          void setProjectIcon({
+            faviconPath: path,
+            projectIcon: projectIcon?.kind === "emoji" ? null : projectIcon,
+          })
+        }
         open={faviconPickerOpen && canEditGroup}
         projectName={group.displayName}
       />

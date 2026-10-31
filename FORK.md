@@ -44,7 +44,7 @@ Keep this list in step with `git diff --stat upstream/main...HEAD`.
 The Z Code look is the one extra that edits upstream files in place, because a reskin has nowhere
 else to live: `apps/web/src/index.css` (dark colors), `components/sidebar/*`, `components/chat/Composer*`,
 `ChatHeader`, `ChatView`, `BranchToolbar`, `SidebarStageBackdrop`, `T3Wordmark`, `DraftHero*`,
-`AppearanceSettingsPanel`, `ui/sidebar.tsx`, `hooks/useTheme.ts`, `index.html` and the startup color in
+`ProjectFavicon`, `ProjectSettingsPanel`, `AppearanceSettingsPanel`, `ui/sidebar.tsx`, `hooks/useTheme.ts`, `index.html` and the startup color in
 `DesktopWindow.ts`. On a sync conflict there, take upstream's behavior and re-apply the styling.
 
 Fork settings (mic on/off, speech helper address, usage meter on/off, split state) are stored in

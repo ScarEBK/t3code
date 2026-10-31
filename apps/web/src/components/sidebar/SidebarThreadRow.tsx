@@ -71,6 +71,7 @@ import { readEnvironmentScope, useEnvironmentScope } from "../../state/session";
 import { formatRelativeTimeLabel, parseTimestampDate } from "../../timestampFormat";
 import type { SidebarThreadSummary } from "../../types";
 import type { EnvironmentProject } from "@t3tools/client-runtime/state/shell";
+import { projectTintProps } from "~/fork/projectTint";
 import { cn } from "~/lib/utils";
 import { textDirection } from "~/textDirection";
 import { EnvironmentMachineIcon } from "../EnvironmentMachineIcon";
@@ -944,6 +945,8 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
     }
   };
 
+  // Settled rows step back, so they keep the logo but lose the color.
+  const rowTintProps = variantAction === "unsettle" ? {} : projectTintProps(props.project);
   const rowSurfaceClassName = cn(
     "group/sidebar-row relative w-full cursor-pointer overflow-hidden rounded-(--control-radius) text-left outline-none select-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
     variantAction === "unsettle" &&
@@ -1216,6 +1219,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
                 aria-label={accessibility.label}
                 aria-current={accessibility.current}
                 data-testid={inFolder ? "sidebar-row-folder" : "sidebar-row-slim"}
+                {...rowTintProps}
                 aria-busy={isRegeneratingTitle || undefined}
                 className={cn(
                   rowSurfaceClassName,
@@ -1245,7 +1249,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
                   )}
                 >
                   {props.project ? (
-                    <ProjectFavicon project={props.project} className="size-4" />
+                    <ProjectFavicon project={props.project} className="size-4.5" />
                   ) : null}
                 </span>
               )}
@@ -1411,6 +1415,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
               aria-label={accessibility.label}
               aria-current={accessibility.current}
               data-testid="sidebar-row-card"
+              {...rowTintProps}
               aria-busy={isRegeneratingTitle || undefined}
               className={rowSurfaceClassName}
               onClick={handleClick}
@@ -1426,7 +1431,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
             <div className="flex h-8.5 min-w-0 items-center gap-2">
               {draftIndicator}
               {props.project ? (
-                <ProjectFavicon project={props.project} className="size-4 shrink-0" />
+                <ProjectFavicon project={props.project} className="size-4.5 shrink-0" />
               ) : null}
               {/* Left of the status slot, the pin would slide when hover swaps the
                 label for the wider row controls. */}

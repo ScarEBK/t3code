@@ -38,6 +38,8 @@ export function ProjectFavicon(input: {
   fallbackIcon?: ComponentType<{ className?: string }>;
 }) {
   const { project } = input;
+  // A chosen logo file wins, which leaves the icon's color free to act as the project's tint.
+  if (project.faviconPath) return <AutomaticProjectFavicon {...input} />;
   if (project.projectIcon?.kind === "monogram") {
     return (
       <ProjectMonogram
