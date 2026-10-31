@@ -1,7 +1,7 @@
 # Scar's T3 Code fork
 
-Fork of [pingdotgg/t3code](https://github.com/pingdotgg/t3code) with four extras: a mic in the
-message box, split view, a "Needs you" list and an always-on Claude usage meter.
+Fork of [pingdotgg/t3code](https://github.com/pingdotgg/t3code) with five extras: a mic in the
+message box, split view, a "Needs you" list, an always-on Claude usage meter and a Z Code look.
 
 New code lives in its own files so upstream updates rebase cleanly:
 
@@ -40,6 +40,12 @@ Keep this list in step with `git diff --stat upstream/main...HEAD`.
 | `packages/shared/src/keybindings.ts`                   | +2     | Default keys: Ctrl/Cmd+Alt+M (mic), Ctrl/Cmd+Alt+S (split).                                                   |
 | `apps/desktop/src/window/DesktopWindow.ts`             | +2     | Grants the microphone to the app's own window only.                                                           |
 | `package.json`                                         | +1     | `fork:sync` script, so `vp run fork:sync` runs the sync.                                                      |
+
+The Z Code look is the one extra that edits upstream files in place, because a reskin has nowhere
+else to live: `apps/web/src/index.css` (dark colors), `components/sidebar/*`, `components/chat/Composer*`,
+`ChatHeader`, `ChatView`, `BranchToolbar`, `SidebarStageBackdrop`, `T3Wordmark`, `DraftHero*`,
+`AppearanceSettingsPanel`, `ui/sidebar.tsx`, `hooks/useTheme.ts`, `index.html` and the startup color in
+`DesktopWindow.ts`. On a sync conflict there, take upstream's behavior and re-apply the styling.
 
 Fork settings (mic on/off, speech helper address, usage meter on/off, split state) are stored in
 `localStorage` under `t3code:fork:*`, so upstream's settings contract is untouched.

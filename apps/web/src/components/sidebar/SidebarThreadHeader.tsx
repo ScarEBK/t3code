@@ -1,4 +1,12 @@
-import { FolderPlusIcon, SearchIcon, SquarePenIcon, XIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  FolderIcon,
+  FolderPlusIcon,
+  ListIcon,
+  MessageCirclePlusIcon,
+  SearchIcon,
+  XIcon,
+} from "lucide-react";
 import {
   type ComponentProps,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -7,16 +15,17 @@ import {
   type RefObject,
 } from "react";
 
+import { useNavigate } from "@tanstack/react-router";
+
+import { updateClientSettings, useBoringSidebarEnabled } from "~/hooks/useSettings";
 import { cn } from "~/lib/utils";
 import { Button } from "../ui/button";
 import { SidebarInput, SidebarMenuButton } from "../ui/sidebar";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
+import { SidebarNavLinks } from "./SidebarChrome";
 
 export interface SidebarThreadHeaderProps {
   searchFieldRef?: RefObject<HTMLDivElement | null>;
-  hasProjects: boolean;
-  projectScope: ReactNode;
-  onNewProject: () => void;
   onNewThread: (event: ReactMouseEvent) => void;
   newThreadDisabled: boolean;
   newThreadShortcutLabel: string | null | undefined;
@@ -34,9 +43,6 @@ export interface SidebarThreadHeaderProps {
 
 export function SidebarThreadHeader({
   searchFieldRef,
-  hasProjects,
-  projectScope,
-  onNewProject,
   onNewThread,
   newThreadDisabled,
   newThreadShortcutLabel,
@@ -59,12 +65,47 @@ export function SidebarThreadHeader({
     : "New thread";
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-col gap-px">
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <SidebarMenuButton
+              aria-label="New thread"
+              disabled={newThreadDisabled}
+              onClick={onNewThread}
+              size="nav"
+              type="button"
+              variant="nav"
+            />
+          }
+        >
+          <MessageCirclePlusIcon />
+          <span className="min-w-0 flex-1 truncate">New thread</span>
+          {newThreadShortcutLabel ? (
+            <span className="ms-auto shrink-0 text-sidebar-muted-foreground/70 text-xs">
+              {newThreadShortcutLabel}
+            </span>
+          ) : null}
+        </TooltipTrigger>
+        <TooltipPopup side="top">
+          {showNewThreadInProjectHint ? (
+            <span className="flex flex-col gap-0.5">
+              <span>{newThreadLabel}</span>
+              <span className="text-muted-foreground">
+                New thread in current project: Shift+click
+                {newThreadInProjectShortcutLabel ? ` (${newThreadInProjectShortcutLabel})` : ""}
+              </span>
+            </span>
+          ) : (
+            newThreadLabel
+          )}
+        </TooltipPopup>
+      </Tooltip>
       <div
         ref={searchFieldRef}
-        className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-sidebar-muted-foreground hover:bg-sidebar-row-hover hover:text-sidebar-foreground focus-within:bg-sidebar-row-hover focus-within:text-sidebar-foreground focus-within:ring-1 focus-within:ring-inset focus-within:ring-ring/70"
+        className="flex h-9 min-w-0 items-center gap-2 rounded-(--control-radius) px-2 text-sm text-sidebar-foreground hover:bg-sidebar-row-hover focus-within:bg-sidebar-row-hover focus-within:ring-1 focus-within:ring-inset focus-within:ring-ring/70"
       >
-        <SearchIcon className="size-4 shrink-0 text-(--sidebar-icon-color)" />
+        <SearchIcon className="size-[1.125rem] shrink-0 text-sidebar-foreground/80" />
         <SidebarInput
           ref={searchInputRef}
           nativeInput
@@ -101,7 +142,26 @@ export function SidebarThreadHeader({
           </Button>
         ) : null}
       </div>
-      <div className="flex shrink-0 items-center">
+      <SidebarNavLinks />
+    </div>
+  );
+}
+
+/** The row above the thread list: how threads are grouped, the project filter, and Archived. */
+export function SidebarThreadListControls({
+  hasProjects,
+  projectScope,
+  onNewProject,
+}: {
+  hasProjects: boolean;
+  projectScope: ReactNode;
+  onNewProject: () => void;
+}) {
+  const navigate = useNavigate();
+  return (
+    <div className="flex items-center gap-0.5 pt-2.5 pb-1">
+      <SidebarGroupingSwitch />
+      <div className="ms-auto flex shrink-0 items-center">
         {hasProjects ? (
           <>
             {projectScope}
@@ -111,27 +171,70 @@ export function SidebarThreadHeader({
           </>
         ) : null}
         <SidebarHeaderIconButton
-          label="New thread"
-          tooltip={
-            showNewThreadInProjectHint ? (
-              <span className="flex flex-col gap-0.5">
-                <span>{newThreadLabel}</span>
-                <span className="text-muted-foreground">
-                  New thread in current project: Shift+click
-                  {newThreadInProjectShortcutLabel ? ` (${newThreadInProjectShortcutLabel})` : ""}
-                </span>
-              </span>
-            ) : (
-              newThreadLabel
-            )
-          }
-          disabled={newThreadDisabled}
-          onClick={onNewThread}
+          label="Archived threads"
+          onClick={() => void navigate({ to: "/settings/archived" })}
         >
-          <SquarePenIcon />
+          <ArchiveIcon />
         </SidebarHeaderIconButton>
       </div>
     </div>
+  );
+}
+
+function SidebarGroupingSwitch() {
+  const groupedByProject = useBoringSidebarEnabled();
+  const setGrouped = (grouped: boolean) => {
+    // Leaving the project view also clears the opt-in of the removed legacy sidebar.
+    void updateClientSettings({ boringSidebarEnabled: grouped, legacySidebarEnabled: false });
+  };
+  return (
+    <div
+      role="group"
+      aria-label="Group threads"
+      className="flex h-7 shrink-0 items-center rounded-full bg-sidebar-control-surface p-0.5 text-xs"
+    >
+      <SidebarGroupingOption
+        active={!groupedByProject}
+        icon={<ListIcon aria-hidden className="size-3.5" />}
+        label="All"
+        onClick={() => setGrouped(false)}
+      />
+      <SidebarGroupingOption
+        active={groupedByProject}
+        icon={<FolderIcon aria-hidden className="size-3.5" />}
+        label="Project"
+        onClick={() => setGrouped(true)}
+      />
+    </div>
+  );
+}
+
+function SidebarGroupingOption({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "flex h-6 cursor-pointer items-center gap-1 rounded-full px-2 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+        active
+          ? "bg-white font-medium text-sidebar-foreground dark:bg-black/60"
+          : "text-sidebar-muted-foreground hover:text-sidebar-foreground",
+      )}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
 

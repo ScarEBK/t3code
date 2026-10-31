@@ -9,6 +9,7 @@ import { BotIcon, PencilRulerIcon } from "lucide-react";
 import { type ComponentProps, memo, useId, useRef, useState } from "react";
 
 import type { ContextWindowSnapshot } from "../../lib/contextWindow";
+import { cn } from "~/lib/utils";
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
 import { Menu, MenuPopup, MenuTrigger } from "../ui/menu";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
@@ -113,7 +114,11 @@ export const ComposerFooterModeControls = memo(function ComposerFooterModeContro
                   data-composer-shortcut="composer.mode"
                   size={size}
                   // Mirrors the model trigger's trailing pe-1 so the gaps on both sides of the chip match.
-                  className="ps-1.5"
+                  className={cn(
+                    "ps-1.5",
+                    props.runtimeMode === "full-access" &&
+                      "text-warning-foreground hover:text-warning-foreground",
+                  )}
                   aria-label={`Permissions: ${runtimeModeOption.label}`}
                 />
               }

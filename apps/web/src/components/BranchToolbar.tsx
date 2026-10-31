@@ -9,7 +9,6 @@ import { FolderGit2Icon, FolderGitIcon, FolderIcon, PlusIcon, ScaleIcon } from "
 import {
   type Ref,
   type MouseEvent as ReactMouseEvent,
-  type ReactNode,
   memo,
   useImperativeHandle,
   useRef,
@@ -75,7 +74,7 @@ export interface BranchToolbarHandle {
 }
 
 interface BranchToolbarProps {
-  layout?: "composer" | "panel";
+  layout?: "composer" | "panel" | "header";
   panelSection?: "all" | "workspace" | "branch";
   forceNewWorktree?: boolean;
   ref?: Ref<BranchToolbarHandle>;
@@ -98,7 +97,6 @@ interface BranchToolbarProps {
   onCheckoutPullRequestRequest?: (reference: string) => void;
   onComposerFocusRequest?: () => void;
   /** Shown at the end of the composer strip, such as the new thread's permissions. */
-  trailing?: ReactNode;
   availableEnvironments?: readonly EnvironmentOption[];
   onEnvironmentChange?: (environmentId: EnvironmentId) => void;
 }
@@ -617,7 +615,6 @@ export const BranchToolbar = memo(function BranchToolbar({
   onComposerFocusRequest,
   availableEnvironments,
   onEnvironmentChange,
-  trailing,
 }: BranchToolbarProps) {
   const branchSelectorRef = useRef<BranchToolbarBranchSelectorHandle>(null);
   const threadRef = scopeThreadRef(environmentId, threadId);
@@ -736,6 +733,50 @@ export const BranchToolbar = memo(function BranchToolbar({
     );
   }
 
+  if (layout === "header") {
+    const pillClassName =
+      "hidden h-7 min-w-0 max-w-52 shrink-0 items-center rounded-full bg-accent px-1 @md/chat-header:flex [-webkit-app-region:no-drag]";
+    return (
+      <div className="group/composer-context contents text-muted-foreground text-xs font-normal">
+        {showEnvironmentIndicator && availableEnvironments ? (
+          <div className={pillClassName}>
+            <BranchToolbarEnvironmentSelector
+              autoEnvironmentLabel={autoEnvironmentLabel}
+              onAutoEnvironment={onAutoEnvironment}
+              envLocked={envLocked}
+              environmentId={environmentId}
+              availableEnvironments={availableEnvironments}
+              {...(showEnvironmentPicker ? { onEnvironmentChange } : {})}
+              {...(addTargets.length > 0 ? { onAddToMachine: () => onAddToMachine(null) } : {})}
+            />
+          </div>
+        ) : null}
+        {showGitControls ? (
+          <div className={pillClassName}>
+            <BranchToolbarBranchSelector
+              forceNewWorktree={forceNewWorktree}
+              ref={branchSelectorRef}
+              className="min-w-0"
+              environmentId={environmentId}
+              threadId={threadId}
+              {...(draftId ? { draftId } : {})}
+              envLocked={envLocked}
+              effectiveEnvModeOverride={effectiveEnvMode}
+              {...(activeThreadBranchOverride !== undefined ? { activeThreadBranchOverride } : {})}
+              {...(onActiveThreadBranchOverrideChange
+                ? { onActiveThreadBranchOverrideChange }
+                : {})}
+              startFromOrigin={startFromOrigin}
+              onStartFromOriginChange={onStartFromOriginChange}
+              {...(onCheckoutPullRequestRequest ? { onCheckoutPullRequestRequest } : {})}
+              {...(onComposerFocusRequest ? { onComposerFocusRequest } : {})}
+            />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <ComposerSurface.ContextStrip
       ref={attachStrip}
@@ -771,7 +812,6 @@ export const BranchToolbar = memo(function BranchToolbar({
           className={cn(
             "min-h-7 min-w-10 items-center gap-1 sm:min-h-6",
             showGitControls ? "hidden @xl/composer-surface:flex" : "flex",
-            "flex-1",
           )}
         >
           {showEnvironmentIndicator && availableEnvironments && (
@@ -813,7 +853,7 @@ export const BranchToolbar = memo(function BranchToolbar({
         <BranchToolbarBranchSelector
           forceNewWorktree={forceNewWorktree}
           ref={branchSelectorRef}
-          className="min-w-0 flex-initial justify-end @xl/composer-surface:ml-auto"
+          className="min-w-0 flex-initial"
           environmentId={environmentId}
           threadId={threadId}
           {...(draftId ? { draftId } : {})}
@@ -827,7 +867,6 @@ export const BranchToolbar = memo(function BranchToolbar({
           {...(onComposerFocusRequest ? { onComposerFocusRequest } : {})}
         />
       ) : null}
-      {trailing}
     </ComposerSurface.ContextStrip>
   );
 });

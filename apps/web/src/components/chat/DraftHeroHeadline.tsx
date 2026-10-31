@@ -35,6 +35,7 @@ import {
 } from "~/state/environments";
 import { ProjectEnvironmentBadge } from "../ProjectEnvironmentBadge";
 import { ProjectFavicon } from "../ProjectFavicon";
+import { T3OutlineMark } from "../T3Wordmark";
 import { isProjectPinShortcut, ProjectPinButton } from "../ProjectPinButton";
 import { sortLogicalProjectsForSidebar } from "../Sidebar.logic";
 import {
@@ -413,13 +414,17 @@ export function DraftHeroHeadline({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col items-center">
+    <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center">
+      <T3OutlineMark
+        aria-hidden
+        className="pointer-events-none absolute bottom-full left-1/2 mb-7 w-72 -translate-x-1/2 text-foreground/12 [mask-image:linear-gradient(to_bottom,black_30%,transparent_95%)] max-md:hidden [@media(max-height:680px)]:hidden"
+      />
       {hasResolvedProject && !isScratchDraft ? (
         <DraftHeroProjectHeading projectName={activeProjectDisplayName ?? "Choose a project"}>
           {projectSelector}
         </DraftHeroProjectHeading>
       ) : (
-        <h1 className="w-full text-center font-normal text-2xl text-foreground tracking-tight sm:text-3xl">
+        <h1 className="w-full text-center font-medium text-2xl text-foreground tracking-tight sm:text-3xl">
           {isScratchDraft ? (
             <>What should we work on?</>
           ) : canChooseProject ? (

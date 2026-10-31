@@ -593,7 +593,7 @@ function SidebarInput({ className, ...props }: Omit<InputProps, "unstyled" | "va
   return (
     <Input
       className={cn(
-        "[&_[data-slot=input]]:h-auto [&_[data-slot=input]]:p-0 [&_[data-slot=input]]:font-medium [&_[data-slot=input]]:text-sidebar-foreground [&_[data-slot=input]]:text-sm [&_[data-slot=input]]:leading-normal [&_[data-slot=input]]:placeholder:text-sidebar-muted-foreground",
+        "[&_[data-slot=input]]:h-auto [&_[data-slot=input]]:p-0 [&_[data-slot=input]]:font-normal [&_[data-slot=input]]:text-sidebar-foreground [&_[data-slot=input]]:text-sm [&_[data-slot=input]]:leading-normal [&_[data-slot=input]]:placeholder:text-sidebar-foreground",
         className,
       )}
       unstyled
@@ -607,6 +607,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       className={cn(
         "relative flex min-w-0 w-full flex-1 flex-col bg-background surface-grain",
+        "md:my-1 md:me-1 md:h-[calc(100dvh-0.5rem)]! md:overflow-hidden md:rounded-[14px] md:peer-data-[state=collapsed]:ms-1",
         "md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ms-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ms-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm/5",
         className,
       )}
@@ -725,9 +726,11 @@ const sidebarMenuButtonVariants = cva(
         icon: "size-8 justify-center rounded-[var(--control-radius)] p-0",
         lg: "h-12 rounded-[var(--control-radius)] px-[var(--sidebar-row-content-inset)] py-2 text-sm group-data-[collapsible=icon]:p-0!",
         sm: "h-7 rounded-[var(--control-radius)] px-[var(--sidebar-row-content-inset)] py-2 text-xs",
+        nav: "h-9 rounded-[var(--control-radius)] px-2 text-sm [&>svg:not([class*='size-'])]:size-[1.125rem]",
       },
       variant: {
         default: "font-medium text-sidebar-muted-foreground/80",
+        nav: "font-normal text-sidebar-foreground [&>svg]:text-sidebar-foreground/80",
         outline: "bg-sidebar-control-surface ring-1 ring-sidebar-border",
       },
     },

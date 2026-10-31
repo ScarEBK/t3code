@@ -54,8 +54,6 @@ export function ComposerControlsBar(props: {
   planModeEnabled: boolean;
   planModeUiEnabled: boolean;
   effortDisplay: EffortDisplay;
-  /** The strip under a new thread names the permissions, so the row does not repeat them. */
-  permissionsShownInStrip: boolean;
   interactionMode: ProviderInteractionMode;
   compatibleRuntimeMode: RuntimeMode;
   defaultRuntimeMode: RuntimeMode | undefined;
@@ -146,7 +144,8 @@ export function ComposerControlsBar(props: {
     overflowShowsPermissions,
     pickerOwnsModeShortcut,
   } = resolveComposerControlsOwnership({
-    matchesDefault: accessMatchesDefault || props.permissionsShownInStrip,
+    // The mode dropdown is always on the row, next to attach.
+    matchesDefault: false,
     planModeUiEnabled,
     collapsed: composerControlsCollapsed,
     measuredHiddenBlockCount,
@@ -216,7 +215,7 @@ export function ComposerControlsBar(props: {
       modelOptionsByInstance={modelOptionsByInstance}
       size={controlSize}
       triggerClassName={cn(
-        "group/model-trigger",
+        "group/model-trigger ms-auto",
         MODEL_TRIGGER_STATES,
         composerControlsCollapsed ? "min-w-13 shrink text-xs!" : "min-w-13",
       )}
@@ -266,8 +265,6 @@ export function ComposerControlsBar(props: {
     </ComposerControl>
   ) : (
     <>
-      {composerModelPicker}
-
       <>
         {restingBlockDefs.map((def, index) => {
           const hidden = index >= restingBlockDefs.length - restingHiddenBlockCount;
@@ -314,6 +311,8 @@ export function ComposerControlsBar(props: {
           />
         </div>
       </>
+
+      {composerModelPicker}
     </>
   );
 }

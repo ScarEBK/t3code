@@ -11,16 +11,12 @@ export type EnvironmentIdentificationPillLabel = "Dev" | "Nightly";
 
 const STAGE_BACKDROP_VIEW_BOX = "0 0 8192 96";
 
+// The default "artwork" mode stays plain in this fork's look; the fixed art choices still work.
 export function resolveSidebarStageBackdropVariant(
-  stageLabel: string,
   mode: EnvironmentIdentificationMode = "artwork",
 ): SidebarStageBackdropVariant | null {
   if (mode === "nightly-artwork") return "nightly";
   if (mode === "dev-artwork") return "dev";
-  if (mode !== "artwork") return null;
-  const normalized = stageLabel.trim().toLowerCase();
-  if (normalized === "nightly") return "nightly";
-  if (normalized === "dev") return "dev";
   return null;
 }
 
@@ -41,12 +37,6 @@ export function useEnvironmentStageLabel(): string {
     primaryServerVersion,
     fallbackStageLabel: APP_STAGE_LABEL,
   });
-}
-
-export function useSidebarStageBackdropVariant(
-  mode: EnvironmentIdentificationMode,
-): SidebarStageBackdropVariant | null {
-  return resolveSidebarStageBackdropVariant(useEnvironmentStageLabel(), mode);
 }
 
 export function SidebarStageBackdrop({ variant }: { variant: SidebarStageBackdropVariant }) {
