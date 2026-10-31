@@ -11,10 +11,13 @@ New code lives in its own files so upstream updates rebase cleanly:
 
 ## Sync with upstream (one command)
 
+`main` is the fork's app. It follows upstream's nightly builds, by merging, so history is never rewritten.
+
 ```sh
-vp run fork:sync                # feature branch: rebase onto upstream/main
-vp run fork:sync -- --merge     # main: merge upstream/main (never force-push main)
-vp run fork:sync -- --check     # just show how far behind upstream we are
+vp run fork:sync                # merge the newest upstream nightly tag
+vp run fork:sync -- --check     # just show how far behind we are
+vp run fork:sync -- --main      # merge upstream/main instead of the newest nightly
+vp run fork:sync -- --rebase    # rebase a short-lived feature branch instead of merging
 ```
 
 It adds the `upstream` remote if missing, refuses to run on a dirty tree, and stops on a conflict
