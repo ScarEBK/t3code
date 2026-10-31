@@ -47,6 +47,7 @@ Fork settings (mic on/off, speech helper address, usage meter on/off, split stat
 ## Windows installer
 
 ```sh
+cp .env.example .env   # required: without it the build has no T3 Connect, so linked machines stay "not connected"
 node scripts/build-desktop-artifact.ts --platform win --target nsis --arch x64
 ```
 
