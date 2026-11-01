@@ -1,5 +1,13 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-01 06:16 Ohio: Add the picks from the design video, without many new skills
+
+"https://www.youtube.com/watch?v=_SVU3oC4JX8 look at this rq dont add anything yet see all the points and ideas he made"
+
+"So if we add these, how many skills and everything like that will we have in total? 'Cause again I really do not wanna add too many skills. Like, how many things are we gonna have in total? Like, is it basically what is gonna be in the whole workflow for the model? Like, what is everything that we've added into the workflow from us basically?"
+
+"ok add it"
+
 ## 2026-11-01 06:05 Ohio: Mercury proof page rejected, the whole thing is bad
 
 "No, see, like this shit just looks fucking ass, like this shit just looks trash, bro. I'm not gonna lie to you. Like, this is—it's way too bad. I don't know what you wanna call it. Like, no... Everything is so low quality. For example, the—I don't know if you made it in Blender. I don't know where the fuck you made these animations. I don't know, shit just looks so shit. I'm not gonna lie to you. None of it just makes any type of sense. One thing for example I like is the nav bar. But even that is just so, so basic. Like, the nav bar is kinda cool, but even that, again, it's just so, so fucking basic. It's definitely not any of these. I am not really, really not happy with it at all. Now again, me as a person, I don't really know what I want, but this is—it's shit, right? The font that you're using, the animation style that you're using, the—it's not even those. Like, the whole thing is just bad. It's just terrible. I'm not gonna lie to you. So I honestly really do not know."
