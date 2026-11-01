@@ -1,5 +1,11 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-01 Ohio: Sessions auto settle after 4 hours
+
+"can you please make it so sessions auto settle after 4 hours on t3 code"
+
+Asked if about 32 idle sessions could settle at once when this turns on: "Yes, switch it on".
+
 ## 2026-11-01 06:16 Ohio: Add the picks from the design video, without many new skills
 
 "https://www.youtube.com/watch?v=_SVU3oC4JX8 look at this rq dont add anything yet see all the points and ideas he made"
