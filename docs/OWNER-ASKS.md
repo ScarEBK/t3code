@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-01 Ohio: Test the design system on a from-scratch Motion Life site
+
+"Yeah, I feel like that would be fine, chroming with not chroming, but making it with Blender is fine. In one circumstance, if we like the final design and we want to upscale it—I feel like we would not upscale it, but like make it better and finalize everything with Blender, that happening—I think it's pretty decent. But I feel like it gotta know the general idea and everything like that, like we need to have the website completely done. How about this? How about you give the task to two different new sessions, one without the design and one with the design, right, and tell them to rework on the Motion Life website? Right, if they had to make it from scratch, same chrome and black, and like I'm saying everything like that, with some actually insane-looking like thing. Let's see the results with that; we'll see which one is better and everything. You know I'm saying, so yeah."
+
 ## 2026-11-01 Ohio: Sessions auto settle after 4 hours
 
 "can you please make it so sessions auto settle after 4 hours on t3 code"
