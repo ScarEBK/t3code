@@ -15,10 +15,12 @@ import {
 import {
   DEFAULT_UNIFIED_SETTINGS,
   type DiffLayout,
-  MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
-  MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
+  MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+  MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
   type ResponseStreamingMode,
   type QuitConfirmationMode,
+  sidebarAutoSettleDaysToHours,
+  sidebarAutoSettleHoursToDays,
   SidebarProjectSortOrder,
 } from "@t3tools/contracts/settings";
 import { desktopUpdateChannelOf } from "@t3tools/shared/cliRelease";
@@ -676,14 +678,15 @@ export function useSettingsRestore(onRestored?: () => void) {
   };
 }
 
-const AUTO_SETTLE_DEFAULT_DAYS = DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays ?? 3;
+const AUTO_SETTLE_DEFAULT_DAYS =
+  DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays ?? sidebarAutoSettleHoursToDays(4);
 
-function AutoSettleDaysInput({
+function AutoSettleHoursInput({
   value,
   onCommit,
 }: {
   value: number;
-  onCommit: (days: number) => void;
+  onCommit: (hours: number) => void;
 }) {
   const [draft, setDraft] = useState(String(value));
   const [draftSource, setDraftSource] = useState(value);
@@ -696,8 +699,8 @@ function AutoSettleDaysInput({
     <Input
       size="sm"
       type="number"
-      min={MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS}
-      max={MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS}
+      min={MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS}
+      max={MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS}
       className="w-full sm:w-24"
       value={draft}
       onChange={(event) => {
@@ -705,14 +708,14 @@ function AutoSettleDaysInput({
         const parsed = Number(event.target.value);
         if (
           Number.isInteger(parsed) &&
-          parsed >= MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS &&
-          parsed <= MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS
+          parsed >= MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS &&
+          parsed <= MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS
         ) {
           onCommit(parsed);
         }
       }}
       onBlur={() => setDraft(String(value))}
-      aria-label="Days of inactivity before auto-settle"
+      aria-label="Hours of inactivity before auto-settle"
     />
   );
 }
@@ -1676,9 +1679,13 @@ export function ThreadsSettingsPanel() {
               title={searchableSetting("days-before-auto-settle").title}
               description="Any new activity un-settles a thread automatically."
               control={
-                <AutoSettleDaysInput
-                  value={settings.sidebarAutoSettleAfterDays}
-                  onCommit={(days) => updateSettings({ sidebarAutoSettleAfterDays: days })}
+                <AutoSettleHoursInput
+                  value={sidebarAutoSettleDaysToHours(settings.sidebarAutoSettleAfterDays)}
+                  onCommit={(hours) =>
+                    updateSettings({
+                      sidebarAutoSettleAfterDays: sidebarAutoSettleHoursToDays(hours),
+                    })
+                  }
                 />
               }
             />

@@ -296,6 +296,20 @@ describe("resolveAutoSettlementAt", () => {
     expect(
       ThreadSettlementService.resolveAutoSettlementAt({ ...input, autoSettleAfterDays: null }),
     ).toBeNull();
+    const fourHours = { ...input, autoSettleAfterDays: 4 / 24 };
+    const idleFor = (ms: number) => shell({ latestRunCompletedAt: at(-ms) });
+    expect(
+      ThreadSettlementService.resolveAutoSettlementAt({
+        ...fourHours,
+        thread: idleFor(DAY_MS / 6 + 1),
+      }),
+    ).toEqual(at(-(DAY_MS / 6 + 1)));
+    expect(
+      ThreadSettlementService.resolveAutoSettlementAt({
+        ...fourHours,
+        thread: idleFor(DAY_MS / 6 - 1),
+      }),
+    ).toBeNull();
   });
 
   it("anchors an empty thread's inactivity at its creation time", () => {
@@ -570,7 +584,9 @@ const makeHarness = Effect.fn("makeThreadSettlementHarness")(function* (options:
   const snapshotReadCount = yield* Ref.make(0);
   const snapshotReads = yield* Queue.unbounded<number>();
   const candidateReads = yield* Ref.make<ReadonlyArray<string | undefined>>([]);
-  const settings = yield* Ref.make(options.settings ?? DEFAULT_SERVER_SETTINGS);
+  const settings = yield* Ref.make(
+    options.settings ?? { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterDays: 3 },
+  );
   const settingsChanges = yield* PubSub.unbounded<ContractServerSettings>();
   const mergedPullRequests = yield* PubSub.unbounded<PullRequestService.PullRequestMergeEvent>();
   const commands = yield* Ref.make<ReadonlyArray<AutoSettleCommand>>([]);

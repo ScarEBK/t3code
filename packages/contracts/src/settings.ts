@@ -73,16 +73,19 @@ export const SidebarProjectGroupingMode = Schema.Literals([
 ]);
 export type SidebarProjectGroupingMode = typeof SidebarProjectGroupingMode.Type;
 const DEFAULT_SIDEBAR_PROJECT_GROUPING_MODE: SidebarProjectGroupingMode = "repository";
-export const MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS = 1;
-export const MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS = 90;
+export const MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS = 1;
+export const MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS = 90 * 24;
+/** Stays in days so saved settings and project overrides keep their meaning; clients edit hours. */
 export const SidebarAutoSettleAfterDays = Schema.Number.check(
   Schema.isBetween({
-    minimum: MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
-    maximum: MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
+    minimum: MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS / 24,
+    maximum: MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS / 24,
   }),
 );
 export type SidebarAutoSettleAfterDays = typeof SidebarAutoSettleAfterDays.Type;
-const DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_DAYS: SidebarAutoSettleAfterDays = 3;
+const DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_DAYS: SidebarAutoSettleAfterDays = 4 / 24;
+export const sidebarAutoSettleDaysToHours = (days: number) => Math.round(days * 24);
+export const sidebarAutoSettleHoursToDays = (hours: number) => hours / 24;
 
 export const MAX_SNOOZE_PRESET_MINUTES = 30 * 24 * 60;
 export const MAX_SNOOZE_PRESETS = 8;

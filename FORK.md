@@ -50,6 +50,14 @@ else to live: `apps/web/src/index.css` (dark colors), `components/sidebar/*`, `c
 Fork settings (mic on/off, speech helper address, usage meter on/off, split state) are stored in
 `localStorage` under `t3code:fork:*`, so upstream's settings contract is untouched.
 
+## Auto-settle after 4 hours
+
+Idle threads settle after four hours by default, and the setting is edited in hours. Upstream's
+schema rejects anything under one day and then ignores all of `settings.json`, so before reinstalling
+the official app, remove any saved `sidebarAutoSettleAfterDays` below 1 from that file. The default
+is not saved there. Changed files: `packages/contracts/src/settings.ts`, the auto-settle controls in
+`SettingsPanels.tsx`, `SettingInheritance.tsx`, `settingsSearch.ts`, and the mobile auto-settle field.
+
 ## Windows installer
 
 ```sh

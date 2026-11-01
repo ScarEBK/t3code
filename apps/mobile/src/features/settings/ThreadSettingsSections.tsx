@@ -1,14 +1,18 @@
 import { Button } from "../../components/ui/Button";
 import { AuthSettingsWriteScope, type ServerSettingsPatch } from "@t3tools/contracts";
 import { useEnvironmentsWithScope } from "../../state/session";
-import { AutoSettleDaysField } from "./components/AutoSettleDaysField";
+import { AutoSettleHoursField } from "./components/AutoSettleHoursField";
 import { ScreenScrollView as ScrollView } from "../../components/ui/ScreenScrollView";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DEFAULT_SERVER_SETTINGS } from "@t3tools/contracts";
+import {
+  DEFAULT_SERVER_SETTINGS,
+  sidebarAutoSettleDaysToHours,
+  sidebarAutoSettleHoursToDays,
+} from "@t3tools/contracts";
 import { supportsSharedSettingsSync } from "@t3tools/client-runtime/state/shared-settings";
 import { AppText as Text } from "../../components/ui/AppText";
 import { useEnvironments } from "../../state/environments";
@@ -41,7 +45,8 @@ export function SettingsLabsRouteScreen() {
   );
 }
 
-const AUTO_SETTLE_DEFAULT_DAYS = DEFAULT_SERVER_SETTINGS.sidebarAutoSettleAfterDays ?? 3;
+const AUTO_SETTLE_DEFAULT_DAYS =
+  DEFAULT_SERVER_SETTINGS.sidebarAutoSettleAfterDays ?? sidebarAutoSettleHoursToDays(4);
 
 /**
  * Usage-limit and auto-settle rows. The Threads page owns their writes, so they share its queue
@@ -140,11 +145,13 @@ export function AutoSettleSettingsRows(props: {
         {afterDays !== null ? (
           <View className="flex-row items-center gap-4 px-4 py-4 android:min-h-14 android:py-3">
             <View className="w-[22px] android:w-6" />
-            <Text className="flex-1 text-foreground text-lg android:text-base">Inactive days</Text>
-            <AutoSettleDaysField
-              value={afterDays}
+            <Text className="flex-1 text-foreground text-lg android:text-base">Inactive hours</Text>
+            <AutoSettleHoursField
+              value={sidebarAutoSettleDaysToHours(afterDays)}
               disabled={disabled}
-              onValueChange={(value) => writeToAll({ sidebarAutoSettleAfterDays: value })}
+              onValueChange={(hours) =>
+                writeToAll({ sidebarAutoSettleAfterDays: sidebarAutoSettleHoursToDays(hours) })
+              }
             />
           </View>
         ) : null}

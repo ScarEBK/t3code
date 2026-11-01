@@ -14,12 +14,15 @@ import {
   DEFAULT_SERVER_SETTINGS,
   globalIdleCompaction,
   idleCompactionPatch,
+  MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
   requiredScopesForProjectMutation,
   resolveIdleCompaction,
   resolveProjectProviderInstanceEnabled,
   resolveProviderInstanceEnabled,
   ServerSettings,
   ServerSettingsPatch,
+  sidebarAutoSettleDaysToHours,
+  sidebarAutoSettleHoursToDays,
   withIdleCompaction,
 } from "./settings.ts";
 
@@ -323,6 +326,25 @@ describe("provider enabled defaults", () => {
     expect(
       resolveProviderInstanceEnabled({ driver: codex, enabled: false, config: { enabled: true } }),
     ).toBe(false);
+  });
+});
+
+describe("ServerSettings auto-settle window", () => {
+  it("defaults to four hours and accepts whole hours down to one", () => {
+    expect(
+      sidebarAutoSettleDaysToHours(decodeServerSettings({}).sidebarAutoSettleAfterDays ?? 0),
+    ).toBe(4);
+    expect(decodeServerSettings({ sidebarAutoSettleAfterDays: 1 }).sidebarAutoSettleAfterDays).toBe(
+      1,
+    );
+    for (let hours = 1; hours <= MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS; hours += 1) {
+      const days = sidebarAutoSettleHoursToDays(hours);
+      expect(decodeServerSettingsPatch({ sidebarAutoSettleAfterDays: days })).toEqual({
+        sidebarAutoSettleAfterDays: days,
+      });
+      expect(sidebarAutoSettleDaysToHours(days)).toBe(hours);
+    }
+    expect(() => decodeServerSettingsPatch({ sidebarAutoSettleAfterDays: 0.5 / 24 })).toThrow();
   });
 });
 
