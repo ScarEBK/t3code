@@ -1,5 +1,19 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-02 Ohio: None of round 2 was good, get ideas from shops like ours
+
+"I picked three, but none of them, honestly, were good at all. I don't know what the fuck these websites are. You know, I'm saying there's a lot of other websites we can get our ideas from. I'm not sure why it has to get its ideas from here. You know, I really do not understand it. It does not look good at all.
+
+For example, there's this website called For 20 Services. You know, I'm saying it has something to do with us, similar things. You know what I'm trying to say? Their design is honestly not that crazy.
+
+There's this website called... like, you know, take a look at 5M, like cheat websites, etc., etc. I mean, you're not gonna sell the same thing they're selling, but you can get UI ideas from them.
+
+There's this website called Bonnie. I believe it's Bonnie AMBANI. It's decent. It's definitely nothing too crazy; I wouldn't say it's crazy, but it has some pretty decent stuff in it. You can take a look at that.
+
+But like, I don't know. I really do not know what these things are that it's showing me. I mean, the website currently—where things are at—it is good. But if we had to redesign it, for example, the checkout page, what would it look like? You know what I'm saying? I'm definitely not a fan of anything that came up, though, to be honest with you."
+
+Link given: https://ambani.dev/products/FiveM
+
 ## 2026-11-01 Ohio: Only designs we can use, more helpers, checkers before Scar looks
 
 "Yeah, that's good, but see another thing would be, it doesn't always like I want it to have. Sometimes, for example, be things that are related to us. Basically, like some things that we could apply. You know, I'm saying one issue that I'm noticing is things that, you know, like a shop like mine, for example. Let's say Motion Life, right? Like, let's say we're gonna run it on Motion Life. For example, a set is like a specific section. What should it be? You know, the different section. How should it look like? You know what I'm saying? Or for example, like, let's say the checkout page or something like that, right? Like, things that basically we can implement. A lot of times, the issues that I see is just things that are not like things that we cannot apply or use, basically for our, like, for our case. Things that basically will just not work. I don't know which section would they even be in. So, I honestly really do not know, bro. I mean, I do see family.co, and a lot of times I see family.co, for example, and other sections, you know, like, for example, if I ask for a payment or check, like a payment plans or whatever it's called, sometimes it's just like a random section of the page, like the top, not, you know, I'm saying, I don't know. So, honestly, the 10 agents, the 10 helpers, like, if you can write the rules to basically make it like 20 agents or 25 different, because like 134k tokens, that's literally nothing, right? So, as many agents as you think would be good, and then maybe like another run of agents that like two or three agents that basically will say, okay, does it actually will it look good? Will it basically before I even take a look at it, you know what I'm saying? Like, you get the idea."
