@@ -43,6 +43,7 @@ import {
   FileDiff,
   Files,
   Globe2,
+  ListChecks,
   MessagesSquare,
   Plus,
   TerminalSquare,
@@ -143,6 +144,8 @@ export interface RightPanelTabsProps {
   onAddDevice: () => void;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
+  /** Fork: the Project Board checklist; absent where it is not offered. */
+  onAddChecklist?: (() => void) | undefined;
   browserAvailable: boolean;
   terminalAvailable: boolean;
   diffAvailable: boolean;
@@ -324,6 +327,8 @@ function RightPanelEmptyState(props: {
   onAddDevice: () => void;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
+  /** Fork: the Project Board checklist; absent where it is not offered. */
+  onAddChecklist?: (() => void) | undefined;
   browserAvailable: boolean;
   terminalAvailable: boolean;
   diffAvailable: boolean;
@@ -404,6 +409,19 @@ function RightPanelEmptyState(props: {
             available: props.sideChatAvailable && !props.sideChatDisabledReason,
             disabledReason: props.sideChatDisabledReason ?? SURFACE_UNAVAILABLE_HINTS.sideChat,
             onClick: props.onAddSideChat,
+          },
+        ]
+      : []),
+    ...(props.onAddChecklist
+      ? [
+          {
+            label: "Checklist",
+            description: "Your apps' jobs from the Project Board.",
+            icon: ListChecks,
+            shortcut: "C",
+            available: true,
+            disabledReason: "",
+            onClick: props.onAddChecklist,
           },
         ]
       : []),
@@ -594,6 +612,8 @@ function surfaceTitle(
       return surface.title ?? surface.target?.name ?? "Device";
     case "side-chat":
       return "Side chat";
+    case "checklist":
+      return "Checklist";
     case "preview": {
       const snapshot = surface.resourceId ? sessions[surface.resourceId] : null;
       if (!snapshot || snapshot.navStatus._tag === "Idle") return "Browser";
@@ -682,6 +702,8 @@ function SurfaceIcon({
       );
     case "pull-requests":
       return <PullRequestGlyph.link className="size-3 shrink-0" />;
+    case "checklist":
+      return <ListChecks className="size-3 shrink-0" />;
     case "side-chat":
       return <SideChatTabIcon environmentId={environmentId} threadId={surface.threadId} />;
     case "device":
@@ -1159,6 +1181,18 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
           },
         ]
       : []),
+    ...(props.onAddChecklist
+      ? [
+          {
+            label: "Checklist",
+            icon: ListChecks,
+            shortcut: "C",
+            available: true,
+            disabledReason: "",
+            onClick: props.onAddChecklist,
+          },
+        ]
+      : []),
   ] as const;
 
   const handleAddSurfaceMenuKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -1534,6 +1568,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
             onAddPullRequests={props.onAddPullRequests}
             onAddDevice={props.onAddDevice}
             onAddSideChat={props.onAddSideChat}
+            onAddChecklist={props.onAddChecklist}
             browserAvailable={props.browserAvailable}
             terminalAvailable={props.terminalAvailable}
             diffAvailable={props.diffAvailable}

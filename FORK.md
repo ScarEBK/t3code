@@ -1,11 +1,13 @@
 # Scar's T3 Code fork
 
-Fork of [pingdotgg/t3code](https://github.com/pingdotgg/t3code) with five extras: a mic in the
-message box, split view, a "Needs you" list, an always-on Claude usage meter and a Z Code look.
+Fork of [pingdotgg/t3code](https://github.com/pingdotgg/t3code) with six extras: a mic in the
+message box, split view, a "Needs you" list, an always-on Claude usage meter, a Z Code look and a
+Checklist tab for the Project Board.
 
 New code lives in its own files so upstream updates rebase cleanly:
 
 - `apps/web/src/fork/` (all web features, their tests and settings)
+- `apps/server/src/fork/` (the Project Board bridge)
 - `apps/desktop/src/window/ForkMediaPermissions.ts` (+ test)
 - `scripts/fork-sync.ts`, this file
 
@@ -46,6 +48,16 @@ else to live: `apps/web/src/index.css` (dark colors), `components/sidebar/*`, `c
 `ChatHeader`, `ChatView`, `BranchToolbar`, `SidebarStageBackdrop`, `T3Wordmark`, `DraftHero*`,
 `ProjectFavicon`, `ProjectSettingsPanel`, `AppearanceSettingsPanel`, `ui/sidebar.tsx`, `hooks/useTheme.ts`, `index.html` and the startup color in
 `DesktopWindow.ts`. On a sync conflict there, take upstream's behavior and re-apply the styling.
+
+## Checklist tab
+
+The right panel's + menu (and the command palette) opens a Checklist tab that reads the Project Board
+(`Desktop/Code/project-board`, port 7790) through `/api/fork/board` on the T3 server, so phones and
+other PCs see it too. Reading needs read scope; Done / Not yet / Reopen need operate scope and write as
+the owner. Set `T3CODE_BOARD_URL` if the board runs elsewhere. Upstream files touched: `server.ts`
+(+2, registers the route), `rightPanelStore.ts` and `closedViewStore.ts` (the `checklist` kind),
+`RightPanelTabs.tsx` (menu entries, title, icon), `RightPanelSurfaceContent.tsx`, `useRightPanelActions.ts`,
+`ChatView.tsx` and `CommandPalette.tsx`. On a conflict, re-add the `checklist` case next to `side-chat`.
 
 Fork settings (mic on/off, speech helper address, usage meter on/off, split state) are stored in
 `localStorage` under `t3code:fork:*`, so upstream's settings contract is untouched.

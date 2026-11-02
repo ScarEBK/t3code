@@ -73,6 +73,7 @@ import {
   SquarePenIcon,
   TextSearchIcon,
   UserPlusIcon,
+  ListChecksIcon,
 } from "lucide-react";
 import { openThreadFind } from "./chat/threadFindStore";
 import {
@@ -1379,6 +1380,16 @@ function OpenCommandPaletteDialog(props: {
       icon: <PullRequestGlyph.link className={ITEM_ICON_CLASS} />,
       run: async () => {
         useRightPanelStore.getState().open(threadRef, "pull-requests");
+      },
+    });
+    actionItems.push({
+      kind: "action",
+      value: "action:open-fork-checklist",
+      searchTerms: ["checklist", "board", "jobs", "tasks", "project board"],
+      title: "Open checklist",
+      icon: <ListChecksIcon className={ITEM_ICON_CLASS} />,
+      run: async () => {
+        useRightPanelStore.getState().open(threadRef, "checklist");
       },
     });
   }
