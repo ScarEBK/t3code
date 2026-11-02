@@ -54,7 +54,8 @@ else to live: `apps/web/src/index.css` (dark colors), `components/sidebar/*`, `c
 The right panel's + menu (and the command palette) opens a Checklist tab that reads the Project Board
 (`Desktop/Code/project-board`, port 7790) through `/api/fork/board` on the T3 server, so phones and
 other PCs see it too. Reading needs read scope; Done / Not yet / Reopen need operate scope and write as
-the owner. Set `T3CODE_BOARD_URL` if the board runs elsewhere. Upstream files touched: `server.ts`
+the owner. Set `T3CODE_BOARD_URL` if the board uses another port; it must stay on this machine, since the
+board refuses non-loopback callers. Upstream files touched: `server.ts`
 (+2, registers the route), `rightPanelStore.ts` and `closedViewStore.ts` (the `checklist` kind),
 `RightPanelTabs.tsx` (menu entries, title, icon), `RightPanelSurfaceContent.tsx`, `useRightPanelActions.ts`,
 `ChatView.tsx` and `CommandPalette.tsx`. On a conflict, re-add the `checklist` case next to `side-chat`.

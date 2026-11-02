@@ -16,7 +16,7 @@ import { authenticateMediaRequest } from "../auth/http.ts";
 
 const BOARD_ROUTE_PREFIX = "/api/fork/board";
 const BOARD_ORIGIN = process.env.T3CODE_BOARD_URL ?? "http://127.0.0.1:7790";
-const CARD_PATH = /^\/cards\/([A-Za-z0-9_-]{1,64})$/;
+const CARD_PATH = /^\/cards\/([A-Za-z0-9_-]{1,64})\/status$/;
 const OWNER_STATUSES = new Set(["todo", "doing", "review", "done", "skip"]);
 const NO_STORE = { "cache-control": "no-store" };
 
@@ -32,6 +32,7 @@ const relay = Effect.fn("ForkBoardProxy.relay")(
     const body = yield* response.json;
     return yield* HttpServerResponse.json(body, { status: response.status, headers: NO_STORE });
   },
+  Effect.timeout("10 seconds"),
   Effect.catch(() => unavailable),
 );
 
@@ -47,7 +48,8 @@ const handler = Effect.gen(function* () {
   }
 
   const card = CARD_PATH.exec(path);
-  if (request.method === "PATCH" && card) {
+  // POST, not PATCH: cross-origin clients (desktop, app.t3.codes) may only send GET and POST.
+  if (request.method === "POST" && card) {
     yield* authenticateMediaRequest(AuthOrchestrationOperateScope);
     const status = url.value.searchParams.get("status") ?? "";
     if (!OWNER_STATUSES.has(status)) {

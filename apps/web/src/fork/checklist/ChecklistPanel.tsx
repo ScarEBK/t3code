@@ -218,7 +218,7 @@ function CardDetail(props: {
         </div>
       ) : null}
       <div className="flex items-center gap-1.5">
-        {card.status === "done" ? (
+        {card.status === "done" || card.status === "skip" ? (
           <Button
             size="xs"
             variant="ghost-muted"

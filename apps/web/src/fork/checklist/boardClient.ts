@@ -45,7 +45,7 @@ function readBoardAccess(
 async function boardRequest(
   environmentId: EnvironmentId,
   path: string,
-  method: "GET" | "PATCH",
+  method: "GET" | "POST",
 ): Promise<unknown> {
   // A media ticket can expire between requests; one fresh ticket retries an auth failure.
   for (const refresh of [false, true]) {
@@ -82,7 +82,7 @@ export async function setCardStatus(
 ): Promise<void> {
   await boardRequest(
     environmentId,
-    `/cards/${encodeURIComponent(cardId)}?status=${status}`,
-    "PATCH",
+    `/cards/${encodeURIComponent(cardId)}/status?status=${status}`,
+    "POST",
   );
 }
