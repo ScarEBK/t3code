@@ -55,7 +55,9 @@ The right panel's + menu (and the command palette) opens a Checklist tab that re
 (`Desktop/Code/project-board`, port 7790) through `/api/fork/board` on the T3 server, so phones and
 other PCs see it too. Reading needs read scope; Done / Not yet / Reopen need operate scope and write as
 the owner. Set `T3CODE_BOARD_URL` if the board uses another port; it must stay on this machine, since the
-board refuses non-loopback callers. Upstream files touched: `server.ts`
+board refuses non-loopback callers. The tab shows each app's logo and percent done, sections with
+their own icons, and a button on every job that writes a ready prompt into the chat (or a new chat
+in that app). It re-reads the board every 15 seconds while open. Upstream files touched: `server.ts`
 (+2, registers the route), `rightPanelStore.ts` and `closedViewStore.ts` (the `checklist` kind),
 `RightPanelTabs.tsx` (menu entries, title, icon), `RightPanelSurfaceContent.tsx`, `useRightPanelActions.ts`,
 `ChatView.tsx` and `CommandPalette.tsx`. On a conflict, re-add the `checklist` case next to `side-chat`.

@@ -170,7 +170,13 @@ export function RightPanelSurfaceContent(props: {
     case "pull-requests":
       return <ThreadPullRequestsPanel threadRef={threadRef} />;
     case "checklist":
-      return <ChecklistPanel environmentId={props.environmentId} visible={visible} />;
+      return (
+        <ChecklistPanel
+          environmentId={props.environmentId}
+          visible={visible}
+          currentProjectId={props.pullRequest.projectId}
+        />
+      );
     case "side-chat":
       // Not lazy: revealing a suspended tiptap editor tears down its view and crashes the composer.
       return (
