@@ -352,23 +352,25 @@ export function ChecklistPanel(props: {
             onContinue={rowProps.onPrompt}
           />
 
-          {waiting.length > 0 ? (
-            <Section
-              icon={<CircleAlertIcon className="size-3.5" />}
-              tone="attention"
-              title="Needs you"
-              trailing={<span className="tabular-nums">{waiting.length}</span>}
-              defaultOpen
-            >
-              {waiting.map((card) => (
-                <TaskRow key={card.id} card={card} showNeeds {...rowProps} />
-              ))}
-            </Section>
-          ) : null}
+          <div className="flex flex-col gap-1">
+            {waiting.length > 0 ? (
+              <Section
+                icon={<CircleAlertIcon className="size-3" />}
+                tone="attention"
+                title="Needs you"
+                trailing={<span className="tabular-nums">{waiting.length}</span>}
+                defaultOpen
+              >
+                {waiting.map((card) => (
+                  <TaskRow key={card.id} card={card} showNeeds {...rowProps} />
+                ))}
+              </Section>
+            ) : null}
 
-          {groups.map((group) => (
-            <GroupSection key={group.key} group={group} rowProps={rowProps} />
-          ))}
+            {groups.map((group) => (
+              <GroupSection key={group.key} group={group} rowProps={rowProps} />
+            ))}
+          </div>
         </div>
       </ScrollArea>
     </div>
@@ -592,14 +594,14 @@ function Section(props: {
         aria-expanded={open}
         onClick={() => setOpen(!open)}
         className={cn(
-          "group flex h-9 w-full min-w-0 items-center gap-2.5 rounded-lg px-2",
+          "group flex h-7 w-full min-w-0 items-center gap-2 rounded-md px-1.5",
           ROW_HOVER,
           FOCUS_RING,
         )}
       >
         <span
           className={cn(
-            "flex size-6 shrink-0 items-center justify-center rounded-md",
+            "flex size-5 shrink-0 items-center justify-center rounded",
             props.tone === "attention"
               ? "bg-warning/12 text-warning-foreground"
               : "bg-foreground/[0.06] text-foreground/80",
@@ -617,7 +619,7 @@ function Section(props: {
           {props.trailing}
         </span>
       </button>
-      {open ? <ul className="mt-0.5 flex flex-col">{props.children}</ul> : null}
+      {open ? <ul className="flex flex-col">{props.children}</ul> : null}
     </section>
   );
 }
@@ -638,7 +640,7 @@ function GroupSection(props: { readonly group: ChecklistGroup; readonly rowProps
   const percent = group.cards.length ? (group.doneCount / group.cards.length) * 100 : 0;
   return (
     <Section
-      icon={<Icon className="size-3.5" />}
+      icon={<Icon className="size-3" />}
       title={group.label}
       defaultOpen={!startsCollapsed(group)}
       trailing={
@@ -672,7 +674,7 @@ function GroupSection(props: { readonly group: ChecklistGroup; readonly rowProps
             aria-expanded={showDone}
             onClick={() => setShowDone(!showDone)}
             className={cn(
-              "flex h-7 w-full items-center gap-2 rounded-lg px-2 text-left text-xs text-muted-foreground",
+              "flex h-6 w-full items-center gap-2 rounded-md px-1.5 text-left text-xs text-muted-foreground",
               ROW_HOVER,
               FOCUS_RING,
             )}
@@ -749,7 +751,7 @@ function TaskRow(props: RowProps & { readonly card: BoardCard; readonly showNeed
   return (
     <li
       data-board-status={card.status}
-      className={cn("group/task flex min-h-8 items-start gap-2 rounded-lg px-2 py-1.5", ROW_HOVER)}
+      className={cn("group/task flex min-h-7 items-start gap-2 rounded-md px-1.5 py-1", ROW_HOVER)}
     >
       <StatusIcon status={card.status} />
       <button
@@ -832,7 +834,7 @@ function IconAction(props: {
             disabled={props.disabled}
             onClick={props.onClick}
             className={cn(
-              "flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 [&_svg]:size-3.5",
+              "flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 [&_svg]:size-3.5",
               ROW_HOVER,
               FOCUS_RING,
             )}
