@@ -29,19 +29,26 @@ with the files to fix. Conflicts can only land in the upstream files listed belo
 
 Keep this list in step with `git diff --stat upstream/main...HEAD`.
 
-| File                                                   | Lines  | Why                                                                                                           |
-| ------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
-| `apps/web/src/components/chat/ChatComposer.tsx`        | +11 −1 | Renders the mic button next to Attach and gives it the insert-at-caret callback.                              |
-| `apps/web/src/components/ThreadRouteView.tsx`          | +4 −1  | Wraps the routed chat in `ForkSplitLayout` so a second chat can sit on the right.                             |
-| `apps/web/src/components/Sidebar.tsx`                  | +14    | Usage meter above Search, Needs you below it; "Open on the right" menu case; Alt/middle-click opens it right. |
-| `apps/web/src/components/sidebar/SidebarThreadRow.tsx` | +5     | Forwards middle-click (`auxclick`) to the row click handler.                                                  |
-| `apps/web/src/components/threadActionMenu.logic.ts`    | +13    | Adds the "Open on the right" menu item in its own group (sidebar only, read-only safe).                       |
-| `apps/web/src/contextMenuFallback.ts`                  | +4     | Icon for that item in the web context menu.                                                                   |
-| `apps/web/src/components/settings/SettingsPanels.tsx`  | +2     | Renders the fork's Dictation + Usage meter sections in Settings → General.                                    |
-| `packages/contracts/src/keybindings.ts`                | +2     | Registers `composer.dictate` and `split.toggle` commands.                                                     |
-| `packages/shared/src/keybindings.ts`                   | +2     | Default keys: Ctrl/Cmd+Alt+M (mic), Ctrl/Cmd+Alt+S (split).                                                   |
-| `apps/desktop/src/window/DesktopWindow.ts`             | +2     | Grants the microphone to the app's own window only.                                                           |
-| `package.json`                                         | +1     | `fork:sync` script, so `vp run fork:sync` runs the sync.                                                      |
+| File                                                        | Lines  | Why                                                                                                           |
+| ----------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/components/chat/ChatComposer.tsx`             | +11 −1 | Renders the mic button next to Attach and gives it the insert-at-caret callback.                              |
+| `apps/web/src/components/ThreadRouteView.tsx`               | +4 −1  | Wraps the routed chat in `ForkSplitLayout` so a second chat can sit on the right.                             |
+| `apps/web/src/components/Sidebar.tsx`                       | +14    | Usage meter above Search, Needs you below it; "Open on the right" menu case; Alt/middle-click opens it right. |
+| `apps/web/src/components/sidebar/SidebarThreadRow.tsx`      | +5     | Forwards middle-click (`auxclick`) to the row click handler.                                                  |
+| `apps/web/src/components/threadActionMenu.logic.ts`         | +13    | Adds the "Open on the right" menu item in its own group (sidebar only, read-only safe).                       |
+| `apps/web/src/contextMenuFallback.ts`                       | +4     | Icon for that item in the web context menu.                                                                   |
+| `apps/web/src/components/settings/SettingsPanels.tsx`       | +2     | Renders the fork's Dictation + Usage meter sections in Settings → General.                                    |
+| `packages/contracts/src/keybindings.ts`                     | +2     | Registers `composer.dictate` and `split.toggle` commands.                                                     |
+| `packages/shared/src/keybindings.ts`                        | +2     | Default keys: Ctrl/Cmd+Alt+M (mic), Ctrl/Cmd+Alt+S (split).                                                   |
+| `apps/desktop/src/window/DesktopWindow.ts`                  | +2     | Grants the microphone to the app's own window only.                                                           |
+| `package.json`                                              | +1     | `fork:sync` script, so `vp run fork:sync` runs the sync.                                                      |
+| `apps/web/src/rightPanelStore.ts`                           | +6     | Adds the `progress` right-panel surface (Progress panel).                                                     |
+| `apps/web/src/components/RightPanelTabs.tsx`                | +29    | "Progress" entry (key R) in both surface launchers, plus its tab title and icon.                              |
+| `apps/web/src/components/chat/RightPanelSurfaceContent.tsx` | +3     | Renders `fork/progress/ProgressPanel` for the `progress` surface.                                             |
+| `apps/web/src/components/chat/useRightPanelActions.ts`      | +7     | `addProgressSurface` opens it from the launcher.                                                              |
+| `apps/web/src/components/ChatView.tsx`                      | +3     | Passes the Progress launcher callback and availability.                                                       |
+| `apps/web/src/components/pullRequest/PullRequestsPage.tsx`  | +2     | Progress is unavailable on the global pull requests page.                                                     |
+| `apps/web/src/closedViewStore.ts`                           | +1     | Lets a closed Progress tab reopen.                                                                            |
 
 The Z Code look is the one extra that edits upstream files in place, because a reskin has nowhere
 else to live: `apps/web/src/index.css` (dark colors), `components/sidebar/*`, `components/chat/Composer*`,
@@ -62,6 +69,13 @@ board refuses non-loopback callers. Upstream files touched: `server.ts`
 
 Fork settings (mic on/off, speech helper address, usage meter on/off, split state) are stored in
 `localStorage` under `t3code:fork:*`, so upstream's settings contract is untouched.
+
+## Progress panel
+
+The Progress surface in the right panel reads `PROGRESS.md` at each project's root (`## Section`,
+then `- [x]` done, `- [~]` in progress, `- [ ]` to do, indented lines as notes) and re-reads it every
+15 seconds while open. Each task can write a ready prompt into the chat, or into a new chat when the
+task belongs to another project. Code lives in `apps/web/src/fork/progress/`.
 
 ## Auto-settle after 4 hours
 
