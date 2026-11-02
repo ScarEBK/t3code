@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-01 Ohio: What is P Stack, without adding too many skills
+
+"Not really necessarily for design, but from what I've heard, PSTAC is actually pretty good code-wise. I know there's a lot of things in it that are good. Exactly what is PSTAC? It's not for design; I know that, it's for coding in general, but I don't know if it's gonna fit inside of my design system or not. I don't know if it's PSTAC Potato; I think the girl name is Potato, like her thing name is Potato, to make sure you're on the right one. But I don't know, from what I've heard, it is really good; it has some really good skills, but I don't want to add anything because I don't add too many skills. I don't want to add too many things, but I've seen a lot of actually top users use it."
+
 ## 2026-11-01 Ohio: Remove the design skills, look into P Stack
 
 "https://pbs.twimg.com/media/HWB8uHubUAAQflf?format=jpg&name=4096x4096
