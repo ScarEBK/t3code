@@ -1,4 +1,4 @@
-import { PROGRESS_FILE_NAME, type ProgressItem, type ProgressSection } from "./progressFile";
+import type { BoardCard } from "./checklistLogic";
 
 // Area hints turn a one-line task into the brief a senior dev would give. They are matched on the
 // task, its notes and its section, so "Webhooks" under "Payments" still gets the Stripe advice.
@@ -53,56 +53,46 @@ function areaSteps(text: string): ReadonlyArray<string> {
   return AREA_HINTS.filter((hint) => hint.match.test(text)).flatMap((hint) => hint.steps);
 }
 
-function listNames(items: ReadonlyArray<ProgressItem>, limit = 4): string {
-  const names = items.slice(0, limit).map((item) => item.text);
-  const rest = items.length - names.length;
+function listNames(cards: ReadonlyArray<BoardCard>, limit = 4): string {
+  const names = cards.slice(0, limit).map((card) => card.title);
+  const rest = cards.length - names.length;
   return rest > 0 ? `${names.join("; ")} and ${rest} more` : names.join("; ");
 }
 
+/** A ready-to-send brief for one Project Board card, with its section for context. */
 export function buildTaskPrompt(input: {
   readonly projectName: string;
-  readonly section: ProgressSection;
-  readonly item: ProgressItem;
+  readonly sectionName: string;
+  readonly sectionCards: ReadonlyArray<BoardCard>;
+  readonly card: BoardCard;
 }): string {
-  const { projectName, section, item } = input;
-  const done = section.items.filter((entry) => entry.status === "done");
-  const open = section.items.filter((entry) => entry.status !== "done" && entry.id !== item.id);
-  const resuming = item.status === "doing";
-
+  const { projectName, sectionName, sectionCards, card } = input;
+  const done = sectionCards.filter((entry) => entry.status === "done");
+  const open = sectionCards.filter(
+    (entry) => entry.status !== "done" && entry.status !== "skip" && entry.id !== card.id,
+  );
   const lines: string[] = [
-    resuming
-      ? `Let's finish "${item.text}" in ${projectName} (${section.title}). It's already in progress, so first check what's done in the code and pick up from there.`
-      : `Let's build "${item.text}" in ${projectName} (${section.title}).`,
+    card.status === "doing" || card.status === "review"
+      ? `Let's finish "${card.title}" in ${projectName} (${sectionName}). It's already in progress, so first check what's done in the code and pick up from there.`
+      : `Let's build "${card.title}" in ${projectName} (${sectionName}).`,
   ];
-  if (item.notes.length > 0) lines.push("", `Context: ${item.notes.join(" ")}`);
+  const context = [card.why, card.status === "review" ? card.needs : ""].filter(Boolean);
+  if (context.length > 0) lines.push("", `Context: ${context.join(" ")}`);
   lines.push(
     "",
-    `Where ${section.title} stands: ${done.length} of ${section.items.length} done.` +
+    `Where ${sectionName} stands: ${done.length} of ${sectionCards.length} done.` +
       (done.length > 0 ? ` Already done: ${listNames(done)}.` : "") +
       (open.length > 0 ? ` Still open besides this: ${listNames(open)}.` : ""),
   );
-
   const steps = [
     "Read the code this touches first, and tell me in two lines how it works today.",
-    ...areaSteps(`${item.text} ${item.notes.join(" ")} ${section.title}`),
+    ...areaSteps(`${card.title} ${card.why} ${sectionName}`),
     "Build it in small steps that follow the project's existing patterns. Ask me before adding a new dependency or service.",
     "Test it for real: run it, try the edge cases, and fix what breaks.",
-    `When it works, update ${PROGRESS_FILE_NAME}: mark this task [x] and add any new tasks you found under "## ${section.title}".`,
+    card.proof ? `It's done when this is true: ${card.proof}` : "Tell me how you proved it works.",
+    `When it works, mark card ${card.id} done on the Project Board.`,
   ];
   lines.push("", "How to do it:", ...steps.map((step, index) => `${index + 1}. ${step}`));
   lines.push("", "Finish with a short summary of what changed and anything I need to do.");
   return lines.join("\n");
-}
-
-export function buildSetupPrompt(projectName: string): string {
-  return [
-    `Set up progress tracking for ${projectName}.`,
-    "",
-    `1. Read the code, README and any docs, then create ${PROGRESS_FILE_NAME} at the project root.`,
-    "2. Add one `## Section` per feature area, and under it every task as `- [x]` done, `- [~]` in progress or `- [ ]` to do. Use plain words, and keep each task small enough for one session.",
-    "3. Only add an indented line under a task when it needs context to be built.",
-    `4. Add this rule to the project's CLAUDE.md (or AGENTS.md): "When you finish a task, update ${PROGRESS_FILE_NAME}: tick what you finished and add any new tasks you found."`,
-    "",
-    "Show me the sections when you're done.",
-  ].join("\n");
 }

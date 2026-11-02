@@ -42,7 +42,6 @@ import {
   ChevronRight,
   FileDiff,
   Files,
-  ChartPie,
   Globe2,
   ListChecks,
   MessagesSquare,
@@ -142,8 +141,6 @@ export interface RightPanelTabsProps {
   onAddFiles: () => void;
   onAddPullRequest: () => void;
   onAddPullRequests: () => void;
-  /** fork: progress panel */
-  onAddProgress: () => void;
   onAddDevice: () => void;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
@@ -155,7 +152,6 @@ export interface RightPanelTabsProps {
   filesAvailable: boolean;
   pullRequestAvailable: boolean;
   pullRequestsAvailable: boolean;
-  progressAvailable: boolean;
   deviceAvailable: boolean;
   sideChatAvailable?: boolean;
   /** Overrides the default reason while side chats are available but cannot start. */
@@ -328,8 +324,6 @@ function RightPanelEmptyState(props: {
   onAddFiles: () => void;
   onAddPullRequest: () => void;
   onAddPullRequests: () => void;
-  /** fork: progress panel */
-  onAddProgress: () => void;
   onAddDevice: () => void;
   /** Absent where side chats are not offered. */
   onAddSideChat?: (() => void) | undefined;
@@ -341,7 +335,6 @@ function RightPanelEmptyState(props: {
   filesAvailable: boolean;
   pullRequestAvailable: boolean;
   pullRequestsAvailable: boolean;
-  progressAvailable: boolean;
   deviceAvailable: boolean;
   sideChatAvailable: boolean;
   sideChatDisabledReason: string | null;
@@ -396,14 +389,6 @@ function RightPanelEmptyState(props: {
       available: props.pullRequestsAvailable,
       disabledReason: SURFACE_UNAVAILABLE_HINTS.pullRequests,
       onClick: props.onAddPullRequests,
-    },
-    {
-      label: "Progress",
-      icon: ChartPie,
-      shortcut: "R",
-      available: props.progressAvailable,
-      disabledReason: "Available when a project is open.",
-      onClick: props.onAddProgress,
     },
     {
       label: "Device",
@@ -623,8 +608,6 @@ function surfaceTitle(
       return `#${surface.number}`;
     case "pull-requests":
       return "Pull requests";
-    case "progress":
-      return "Progress";
     case "device":
       return surface.title ?? surface.target?.name ?? "Device";
     case "side-chat":
@@ -721,8 +704,6 @@ function SurfaceIcon({
       return <PullRequestGlyph.link className="size-3 shrink-0" />;
     case "checklist":
       return <ListChecks className="size-3 shrink-0" />;
-    case "progress":
-      return <ChartPie className="size-3 shrink-0" />;
     case "side-chat":
       return <SideChatTabIcon environmentId={environmentId} threadId={surface.threadId} />;
     case "device":
@@ -1181,14 +1162,6 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
       onClick: props.onAddPullRequests,
     },
     {
-      label: "Progress",
-      icon: ChartPie,
-      shortcut: "R",
-      available: props.progressAvailable,
-      disabledReason: "Progress is only available when a project is open.",
-      onClick: props.onAddProgress,
-    },
-    {
       label: "Device",
       icon: Smartphone,
       shortcut: "M",
@@ -1593,7 +1566,6 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
             onAddFiles={props.onAddFiles}
             onAddPullRequest={props.onAddPullRequest}
             onAddPullRequests={props.onAddPullRequests}
-            onAddProgress={props.onAddProgress}
             onAddDevice={props.onAddDevice}
             onAddSideChat={props.onAddSideChat}
             onAddChecklist={props.onAddChecklist}
@@ -1603,7 +1575,6 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
             filesAvailable={props.filesAvailable}
             pullRequestAvailable={props.pullRequestAvailable}
             pullRequestsAvailable={props.pullRequestsAvailable}
-            progressAvailable={props.progressAvailable}
             deviceAvailable={props.deviceAvailable}
             sideChatAvailable={props.sideChatAvailable === true}
             sideChatDisabledReason={props.sideChatDisabledReason ?? null}

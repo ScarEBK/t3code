@@ -155,12 +155,6 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
   const addChecklistSurfaceStable = useStableCallback(() => {
     if (activeThreadRef) useRightPanelStore.getState().open(activeThreadRef, "checklist");
   });
-  // fork: progress panel
-  const addProgressSurface = () => {
-    if (!activeThreadRef || !activeProject) return;
-    useRightPanelStore.getState().open(activeThreadRef, "progress");
-  };
-  const addProgressSurfaceStable = useStableCallback(addProgressSurface);
   const addDeviceSurface = () => {
     if (!activeThreadRef) return;
     if (!deviceState.onboardingCompleted || deviceState.hostStatus === "disabled") {
@@ -358,7 +352,6 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
     addFilesSurfaceStable,
     addPullRequestSurfaceStable,
     addPullRequestsSurfaceStable,
-    addProgressSurfaceStable,
     closePreviewPanelStable,
     copyRightPanelFilePathStable,
     createBrowserSurface,
