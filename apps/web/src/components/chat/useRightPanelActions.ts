@@ -341,6 +341,11 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
       if (!event.repeat) closeRightPanelSurface(activeRightPanelSurface);
     },
     "diff.toggle": () => onToggleDiff(),
+    "checklist.toggle": () => {
+      if (!activeThreadRef) return;
+      if (rightPanelOpen && activeRightPanelSurface?.kind === "checklist") closePreviewPanel();
+      else useRightPanelStore.getState().open(activeThreadRef, "checklist");
+    },
   } satisfies ChatShortcutCommands;
 
   return {

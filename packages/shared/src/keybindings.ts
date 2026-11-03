@@ -181,6 +181,7 @@ export const DEFAULT_KEYBINDINGS: ReadonlyArray<KeybindingRule> = [
   { key: "mod+s", command: "composer.stash", when: "!terminalFocus" },
   { key: "mod+alt+m", command: "composer.dictate", when: "!terminalFocus" },
   { key: "mod+alt+s", command: "split.toggle", when: "!terminalFocus" },
+  { key: "insert", command: "checklist.toggle", when: "!terminalFocus" },
   { key: "mod+shift+enter", command: "thread.steerQueuedMessage", when: "!terminalFocus" },
   { key: "alt+arrowup", command: "thread.editQueuedMessage", when: "composerFocus" },
   { key: "mod+enter", command: "composer.sendAlternate", when: "composerFocus && turnRunning" },

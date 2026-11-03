@@ -38,8 +38,8 @@ Keep this list in step with `git diff --stat upstream/main...HEAD`.
 | `apps/web/src/components/threadActionMenu.logic.ts`    | +13    | Adds the "Open on the right" menu item in its own group (sidebar only, read-only safe).                       |
 | `apps/web/src/contextMenuFallback.ts`                  | +4     | Icon for that item in the web context menu.                                                                   |
 | `apps/web/src/components/settings/SettingsPanels.tsx`  | +2     | Renders the fork's Dictation + Usage meter sections in Settings → General.                                    |
-| `packages/contracts/src/keybindings.ts`                | +2     | Registers `composer.dictate` and `split.toggle` commands.                                                     |
-| `packages/shared/src/keybindings.ts`                   | +2     | Default keys: Ctrl/Cmd+Alt+M (mic), Ctrl/Cmd+Alt+S (split).                                                   |
+| `packages/contracts/src/keybindings.ts`                | +2     | Registers `composer.dictate`, `split.toggle` and `checklist.toggle` commands.                                 |
+| `packages/shared/src/keybindings.ts`                   | +2     | Default keys: Ctrl/Cmd+Alt+M (mic), Ctrl/Cmd+Alt+S (split), Insert (Checklist).                               |
 | `apps/desktop/src/window/DesktopWindow.ts`             | +2     | Grants the microphone to the app's own window only.                                                           |
 | `package.json`                                         | +1     | `fork:sync` script, so `vp run fork:sync` runs the sync.                                                      |
 
@@ -59,7 +59,7 @@ board refuses non-loopback callers. The tab shows each app's logo and percent do
 their own icons, and a button on every job that writes a ready prompt into the chat (or a new chat
 in that app). It re-reads the board every 15 seconds while open. Upstream files touched: `server.ts`
 (+2, registers the route), `rightPanelStore.ts` and `closedViewStore.ts` (the `checklist` kind),
-`RightPanelTabs.tsx` (menu entries, title, icon), `RightPanelSurfaceContent.tsx`, `useRightPanelActions.ts`,
+`RightPanelTabs.tsx` (menu entries, title, icon), `useRightPanelActions.ts` (the Insert shortcut), `RightPanelSurfaceContent.tsx`, `useRightPanelActions.ts`,
 `ChatView.tsx` and `CommandPalette.tsx`. On a conflict, re-add the `checklist` case next to `side-chat`.
 
 Fork settings (mic on/off, speech helper address, usage meter on/off, split state) are stored in
