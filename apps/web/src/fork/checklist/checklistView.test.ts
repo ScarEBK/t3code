@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vite-plus/test";
 import type { BoardCard } from "./checklistLogic";
 import { buildTaskPrompt } from "./checklistPrompt";
-import { countCards, nextCard, sameProjectName, sectionIconName } from "./checklistView";
+import {
+  bestProjectMatch,
+  countCards,
+  nextCard,
+  projectMatchScore,
+  sameProjectName,
+  sectionIconName,
+} from "./checklistView";
 
 const card = (id: string, patch: Partial<BoardCard>): BoardCard => ({
   id,
@@ -51,6 +58,35 @@ describe("checklist view", () => {
   it("matches board and chat project names loosely", () => {
     expect(sameProjectName("Motion Life", "motion-life")).toBe(true);
     expect(sameProjectName("5Hub", "MotionCord")).toBe(false);
+  });
+
+  it("links the open chat to its board app by folder first, then by name", () => {
+    const shop = {
+      name: "Motion Life website",
+      paths: [
+        "C:/Users/Administrator/Desktop/Code/motionlife-shop",
+        "/home/dev/Code/motionlife-shop",
+      ],
+    };
+    const discord = { name: "Motion Life Discord", paths: [] };
+    const laptopShop = {
+      title: "motionlife-shop",
+      workspaceRoot: "C:\\Users\\piceo\\Desktop\\motionlife-shop",
+    };
+    expect(
+      projectMatchScore(shop, { title: "x", workspaceRoot: "/home/dev/Code/motionlife-shop/" }),
+    ).toBe(3);
+    expect(projectMatchScore(shop, laptopShop)).toBe(2);
+    expect(projectMatchScore(discord, { title: "motionlife-discord", workspaceRoot: "D:/x" })).toBe(
+      1,
+    );
+    expect(projectMatchScore(discord, laptopShop)).toBe(0);
+    expect(bestProjectMatch([discord, shop], (board) => projectMatchScore(board, laptopShop))).toBe(
+      shop,
+    );
+    expect(
+      bestProjectMatch([discord], (board) => projectMatchScore(board, laptopShop)),
+    ).toBeUndefined();
   });
 
   it("writes a Stripe brief with the card's context and proof", () => {

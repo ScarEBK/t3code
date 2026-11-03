@@ -77,7 +77,8 @@ import {
   countCards,
   nextCard,
   projectCards,
-  sameProjectName,
+  bestProjectMatch,
+  projectMatchScore,
   sectionIconName,
   type ProjectCounts,
 } from "./checklistView";
@@ -178,8 +179,9 @@ function useSendPrompt(currentProjectId: ProjectId | null) {
   const projects = useProjects();
   return (prompt: string, boardProject: BoardProject) => {
     const target =
-      projects.find(
-        (project) => !project.archivedAt && sameProjectName(project.title, boardProject.name),
+      bestProjectMatch(
+        projects.filter((project) => !project.archivedAt),
+        (project) => projectMatchScore(boardProject, project),
       ) ?? null;
     if (target && target.id !== currentProjectId) {
       void handleNewThread(scopeProjectRef(target.environmentId, target.id), { prompt }).catch(() =>
@@ -210,10 +212,10 @@ export function ChecklistPanel(props: {
   const [snapshot, setSnapshot] = useState<BoardSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [pickedId, setPickedId] = useState(readStoredProject);
+  // A tile click holds only while this chat's project stays open; switching projects follows the chat.
+  const [picked, setPicked] = useState<{ id: string; forProject: ProjectId | null } | null>(null);
   const [busyCardId, setBusyCardId] = useState<string | null>(null);
-  const currentTitle =
-    useProjects().find((project) => project.id === currentProjectId)?.title ?? null;
+  const currentProject = useProjects().find((project) => project.id === currentProjectId) ?? null;
   const send = useSendPrompt(currentProjectId);
 
   const pull = async () => {
@@ -293,11 +295,15 @@ export function ChecklistPanel(props: {
   const summaries = summarizeProjects(snapshot).toSorted((left, right) =>
     left.project.name.localeCompare(right.project.name),
   );
-  const fromChat = currentTitle
-    ? summaries.find((entry) => sameProjectName(entry.project.name, currentTitle))
+  const fromChat = currentProject
+    ? bestProjectMatch(summaries, (entry) => projectMatchScore(entry.project, currentProject))
     : undefined;
-  const selected =
-    summaries.find((entry) => entry.project.id === pickedId) ?? fromChat ?? summaries[0] ?? null;
+  const pickedHere =
+    picked && picked.forProject === currentProjectId
+      ? summaries.find((entry) => entry.project.id === picked.id)
+      : undefined;
+  const lastPicked = summaries.find((entry) => entry.project.id === readStoredProject());
+  const selected = pickedHere ?? fromChat ?? lastPicked ?? summaries[0] ?? null;
 
   if (!selected) {
     return <PanelMessage title="No apps on the board yet" />;
@@ -336,7 +342,7 @@ export function ChecklistPanel(props: {
                 counts={countCards(projectCards(snapshot, entry.project.id))}
                 selected={entry.project.id === selected.project.id}
                 onSelect={() => {
-                  setPickedId(entry.project.id);
+                  setPicked({ id: entry.project.id, forProject: currentProjectId });
                   storeProject(entry.project.id);
                 }}
               />

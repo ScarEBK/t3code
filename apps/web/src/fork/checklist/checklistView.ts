@@ -78,3 +78,41 @@ export function sameProjectName(left: string, right: string): boolean {
   const key = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
   return key(left) !== "" && key(left) === key(right);
 }
+
+const normalizePath = (value: string) =>
+  value.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase();
+const folderName = (value: string) => normalizePath(value).split("/").pop() ?? "";
+
+/**
+ * How well a board app fits a chat project: 3 = same folder, 2 = same folder name (the same repo
+ * on another computer), 1 = same name, 0 = no link. Folder names beat names because chat projects
+ * are usually named after the folder ("motionlife-shop") while the board says "Motion Life website".
+ */
+export function projectMatchScore(
+  board: { readonly name: string; readonly paths?: ReadonlyArray<string> },
+  chat: { readonly title: string; readonly workspaceRoot: string },
+): number {
+  const paths = board.paths ?? [];
+  const root = normalizePath(chat.workspaceRoot);
+  if (paths.some((path) => normalizePath(path) === root)) return 3;
+  const folder = folderName(chat.workspaceRoot);
+  if (folder !== "" && paths.some((path) => folderName(path) === folder)) return 2;
+  return sameProjectName(board.name, chat.title) ? 1 : 0;
+}
+
+/** The best match among `items`, or undefined when none links at all. First wins a tie. */
+export function bestProjectMatch<T>(
+  items: ReadonlyArray<T>,
+  score: (item: T) => number,
+): T | undefined {
+  let best: T | undefined;
+  let bestScore = 0;
+  for (const item of items) {
+    const next = score(item);
+    if (next > bestScore) {
+      best = item;
+      bestScore = next;
+    }
+  }
+  return best;
+}

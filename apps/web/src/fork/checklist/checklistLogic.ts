@@ -5,6 +5,8 @@ export interface BoardProject {
   readonly name: string;
   readonly color: string;
   readonly icon: string;
+  /** Folders this app lives in, on every computer. Links it to the open chat's project. */
+  readonly paths?: ReadonlyArray<string>;
   readonly deleted?: boolean;
 }
 
