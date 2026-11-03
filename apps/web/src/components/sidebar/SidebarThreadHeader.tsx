@@ -25,7 +25,6 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { SidebarNavLinks } from "./SidebarChrome";
 
 export interface SidebarThreadHeaderProps {
-  searchFieldRef?: RefObject<HTMLDivElement | null>;
   onNewThread: (event: ReactMouseEvent) => void;
   newThreadDisabled: boolean;
   newThreadShortcutLabel: string | null | undefined;
@@ -42,7 +41,6 @@ export interface SidebarThreadHeaderProps {
 }
 
 export function SidebarThreadHeader({
-  searchFieldRef,
   onNewThread,
   newThreadDisabled,
   newThreadShortcutLabel,
@@ -101,10 +99,7 @@ export function SidebarThreadHeader({
           )}
         </TooltipPopup>
       </Tooltip>
-      <div
-        ref={searchFieldRef}
-        className="flex h-9 min-w-0 items-center gap-2 rounded-(--control-radius) px-2 text-sm text-sidebar-foreground hover:bg-sidebar-row-hover focus-within:bg-sidebar-row-hover focus-within:ring-1 focus-within:ring-inset focus-within:ring-ring/70"
-      >
+      <div className="flex h-9 min-w-0 items-center gap-2 rounded-(--control-radius) px-2 text-sm text-sidebar-foreground hover:bg-sidebar-row-hover focus-within:bg-sidebar-row-hover focus-within:ring-1 focus-within:ring-inset focus-within:ring-ring/70">
         <SearchIcon className="size-[1.125rem] shrink-0 text-sidebar-foreground/80" />
         <SidebarInput
           ref={searchInputRef}
