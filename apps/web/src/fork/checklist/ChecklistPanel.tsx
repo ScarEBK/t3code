@@ -1,4 +1,4 @@
-import { scopeProjectRef } from "@t3tools/client-runtime/environment";
+import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import type { EnvironmentId, ProjectId } from "@t3tools/contracts";
 import {
   ArrowRightIcon,
@@ -57,6 +57,7 @@ import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
 import { useComposerHandleContext } from "~/composerHandleContext";
 import { useNewThreadHandler } from "~/hooks/useHandleNewThread";
 import { cn } from "~/lib/utils";
+import { useRightPanelStore } from "~/rightPanelStore";
 import { useProjects } from "~/state/entities";
 import fiveHubLogo from "./5hub-logo.png";
 import motionLifeLogo from "./motion-life-logo.png";
@@ -171,20 +172,48 @@ function AppMark(props: { readonly project: BoardProject; readonly size: "sm" | 
   );
 }
 
+/** Opens a new chat in the T3 project matching a board app, keeping the Checklist beside it. */
+function useOpenAppChat(currentProjectId: ProjectId | null) {
+  const handleNewThread = useNewThreadHandler();
+  const projects = useProjects();
+  const findTarget = (boardProject: BoardProject) =>
+    projects.find(
+      (project) => !project.archivedAt && sameProjectName(project.title, boardProject.name),
+    ) ?? null;
+  const openChat = (boardProject: BoardProject, prompt?: string) => {
+    const target = findTarget(boardProject);
+    if (!target) {
+      toastManager.add({
+        type: "error",
+        title: `No project named ${boardProject.name}`,
+        description: "Add its folder as a project in T3 Code first.",
+      });
+      return;
+    }
+    handleNewThread(scopeProjectRef(target.environmentId, target.id), prompt ? { prompt } : {})
+      .then((created) => {
+        if (created) {
+          useRightPanelStore
+            .getState()
+            .open(scopeThreadRef(target.environmentId, created.threadId), "checklist");
+        }
+      })
+      .catch(() =>
+        toastManager.add({ type: "error", title: `Couldn't open a new chat in ${target.title}` }),
+      );
+  };
+  const isCurrent = (boardProject: BoardProject) =>
+    findTarget(boardProject)?.id === currentProjectId;
+  return { openChat, isCurrent };
+}
+
 /** Into this chat for its own app; a new chat in the matching app otherwise. */
 function useSendPrompt(currentProjectId: ProjectId | null) {
   const composerRef = useComposerHandleContext();
-  const handleNewThread = useNewThreadHandler();
-  const projects = useProjects();
+  const { openChat, isCurrent } = useOpenAppChat(currentProjectId);
   return (prompt: string, boardProject: BoardProject) => {
-    const target =
-      projects.find(
-        (project) => !project.archivedAt && sameProjectName(project.title, boardProject.name),
-      ) ?? null;
-    if (target && target.id !== currentProjectId) {
-      void handleNewThread(scopeProjectRef(target.environmentId, target.id), { prompt }).catch(() =>
-        toastManager.add({ type: "error", title: `Couldn't open a new chat in ${target.title}` }),
-      );
+    if (!isCurrent(boardProject)) {
+      openChat(boardProject, prompt);
       return;
     }
     const composer = composerRef?.current ?? null;
@@ -215,6 +244,7 @@ export function ChecklistPanel(props: {
   const currentTitle =
     useProjects().find((project) => project.id === currentProjectId)?.title ?? null;
   const send = useSendPrompt(currentProjectId);
+  const appChat = useOpenAppChat(currentProjectId);
 
   const pull = async () => {
     try {
@@ -338,6 +368,7 @@ export function ChecklistPanel(props: {
                 onSelect={() => {
                   setPickedId(entry.project.id);
                   storeProject(entry.project.id);
+                  if (!appChat.isCurrent(entry.project)) appChat.openChat(entry.project);
                 }}
               />
             ))}

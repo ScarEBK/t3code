@@ -1,5 +1,15 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-03 Ohio: Stay on nightly, keep the fork, auto-update it
+
+"I want to stay on the nightly version. I know there will probably be some bugs, but they automatically get fixed. Not only that, but I don't want it to be on the official version. I want to stay on this currently forked version. [...] I want it to automatically get all the updates that do not interfere with the forked version, like the design and things like that. Basically, I want it to automatically get added to the fork."
+
+## 2026-11-03 Ohio: Checklist app tiles open a new chat in that app
+
+"Whenever I click on, for example, a different project—let's say I'm on the website right and I click on the FiveHub app, for example—I want it to automatically go ahead and create a new thread, basically within the exact project location and everything." Asked where he clicks: "Checklist app tiles."
+
+"Whenever I open up the project for Motion Life and I click on a checklist, it says "you're not in a valid repository" or some shit like that, or like "not in a valid app.""
+
 ## 2026-11-02 Ohio: Finish the Checklist tab today, redo the look like Z Code or Cursor would
 
 "I'm not sure where we left off last time on the sidebar thing, for example, on each single app like the tasks. Basically, I wanna get done with that really today in the T3 Code app."
