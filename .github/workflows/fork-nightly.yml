@@ -92,7 +92,7 @@ jobs:
       # A cache hit adds vp's bin dir in POSIX form, which Windows child processes can't resolve.
       - name: Put vp on the Windows PATH
         shell: pwsh
-        run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.vite-plusin"
+        run: Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $env:USERPROFILE ".vite-plus/bin")
 
       - name: Build resource monitor
         shell: bash
