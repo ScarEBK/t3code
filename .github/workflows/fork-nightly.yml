@@ -1,0 +1,116 @@
+# Fork only: merge the newest upstream nightly into main, then publish a Windows build
+# the installed fork app updates itself from. A conflict opens an issue instead.
+name: Fork nightly
+
+on:
+  schedule:
+    - cron: "23 */4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: fork-nightly
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'ScarEBK/t3code'
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.version.outputs.build }}
+      version: ${{ steps.version.outputs.version }}
+      sha: ${{ steps.version.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Merge newest upstream nightly
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "fork-nightly[bot]"
+          git config user.email "fork-nightly@users.noreply.github.com"
+          git remote add upstream https://github.com/pingdotgg/t3code.git
+          if ! node scripts/fork-sync.ts; then
+            git merge --abort || true
+            title="Upstream nightly needs a hand merge"
+            if [ -z "$(gh issue list --state open --search "$title in:title" --json number -q '.[0].number')" ]; then
+              gh issue create --title "$title" --body "The scheduled sync hit a merge conflict. Run \`vp run fork:sync\` locally, fix the files it lists (see FORK.md), and push main. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            fi
+            exit 1
+          fi
+          git push origin HEAD:main
+
+      # Version = the merged upstream nightly with its build number times 1000 plus the
+      # fork commits on top, so every fork build sorts above the last and stays "nightly".
+      - id: version
+        name: Pick version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Only upstream's tags count; the fork's own release tags use the same shape.
+          tag=""
+          for t in $(git ls-remote --tags --refs upstream 'v*-nightly.*' | sed 's#.*refs/tags/##' | sort -V -r); do
+            if git merge-base --is-ancestor "$t" HEAD 2>/dev/null; then tag=$t; break; fi
+          done
+          [ -n "$tag" ] || { echo "No merged upstream nightly tag." >&2; exit 1; }
+          base=${tag#v}
+          count=$(git rev-list --count "$tag..HEAD")
+          version="${base%.*}.$(( ${base##*.} * 1000 + count ))"
+          sha=$(git rev-parse HEAD)
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "v$version already published."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: sync
+    if: needs.sync.outputs.build == 'true'
+    runs-on: windows-2025
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.sync.outputs.sha }}
+
+      - uses: ./.github/actions/setup-ci-deps
+
+      - name: Build resource monitor
+        shell: bash
+        run: cargo build --locked --release --manifest-path native/resource-monitor/Cargo.toml --target x86_64-pc-windows-msvc
+
+      - name: Build installer
+        shell: bash
+        env:
+          T3CODE_DESKTOP_REUSE_RESOURCE_MONITOR: true
+          T3CODE_DESKTOP_UPDATE_REPOSITORY: ${{ github.repository }}
+        run: |
+          cp .env.example .env
+          node scripts/build-desktop-artifact.ts --platform win --target nsis --arch x64 \
+            --build-version "${{ needs.sync.outputs.version }}" --verbose
+
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls release
+          gh release create "v${{ needs.sync.outputs.version }}" \
+            --target "${{ needs.sync.outputs.sha }}" \
+            --prerelease \
+            --title "Fork nightly ${{ needs.sync.outputs.version }}" \
+            --notes "Upstream nightly plus Scar's fork changes. Built from ${{ needs.sync.outputs.sha }}." \
+            release/*.exe release/*.blockmap release/*.yml

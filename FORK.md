@@ -86,7 +86,16 @@ x86_64-pc-windows-msvc`) and run the command with `T3CODE_DESKTOP_REUSE_RESOURCE
 The installer uses the same app id as the official build, so installing it replaces the official
 app in place (same data in `~/.t3`); reinstall the official one to go back.
 
-Built unsigned (signing is off unless `T3CODE_DESKTOP_SIGNED` is set). Leave
-`GITHUB_REPOSITORY` / `T3CODE_DESKTOP_UPDATE_REPOSITORY` unset: with no publish feed the build
-has no `app-update.yml`, so the installed app never auto-updates back to the official release.
-It keeps using `~/.t3` like the official app (override with `T3CODE_HOME`).
+Built unsigned (signing is off unless `T3CODE_DESKTOP_SIGNED` is set). It keeps using `~/.t3`
+like the official app (override with `T3CODE_HOME`).
+
+## Automatic updates
+
+`.github/workflows/fork-nightly.yml` runs every 4 hours on GitHub: it merges the newest upstream
+nightly into `main`, builds the Windows installer with `T3CODE_DESKTOP_UPDATE_REPOSITORY` set to
+this repo, and publishes it as a prerelease. An installed fork build then updates itself from those
+releases on the nightly channel. Its version is the upstream nightly's with the build number times
+1000 plus the fork commits on top, so each fork build sorts above the last. A merge conflict opens
+an issue and publishes nothing; fix it with `vp run fork:sync` and push `main`.
+
+A local build without `T3CODE_DESKTOP_UPDATE_REPOSITORY` has no update feed and never updates.
