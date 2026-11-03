@@ -89,6 +89,11 @@ jobs:
 
       - uses: ./.github/actions/setup-ci-deps
 
+      # A cache hit adds vp's bin dir in POSIX form, which Windows child processes can't resolve.
+      - name: Put vp on the Windows PATH
+        shell: pwsh
+        run: Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\.vite-plusin"
+
       - name: Build resource monitor
         shell: bash
         run: cargo build --locked --release --manifest-path native/resource-monitor/Cargo.toml --target x86_64-pc-windows-msvc
