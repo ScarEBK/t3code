@@ -1,5 +1,19 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-03 Ohio: Pick several Checklist tasks, one combined prompt
+
+"I'm leaving the design stuff Until the end [...] I wanna be able you know to select for example one two three you know and have a agent to basically work on all three tasks um like you know after he gets done with one it will go to the next Uh and like it will add all of them like into the same prompt basically [...] a whole section is not important just as long as I can do multiple tasks and it will basically add the prompt with each other and write like a better prompt as well"
+
+## 2026-11-03 Ohio: "No apps on the board yet" keeps showing, Insert and tiles should open a chat
+
+Insert key: "Open + new chat if needed" (opens the Checklist; new chat in the picked app only if the current chat is a different app).
+
+Unsent chat already open in that app: "Reuse the unsent chat".
+
+The "check" step: "you click on make a prompt for it like it will make a prompt [...] Like a session is done and it did what I've asked it to, you know what I'm saying if it's not like a design thing they couldn't automatically mark as done on its own like it doesn't need me [...] we gonna let the agent of course you know mark it as done or market has not done whatever it is". Also: "you click on for example five hub From what I've seen it doesn't open up like a new thread for you."
+
+PC or VPS for new chats: "if there's more than four sessions open on the VPS then it should open it on the PC if I'm on the PC you know I'm saying uh but if there's not four sessions on the VPS and it's gonna be like a long task it can open it on the VPS all the time".
+
 ## 2026-11-03 Ohio: Stay on nightly, keep the fork, auto-update it
 
 "I want to stay on the nightly version. I know there will probably be some bugs, but they automatically get fixed. Not only that, but I don't want it to be on the official version. I want to stay on this currently forked version. [...] I want it to automatically get all the updates that do not interfere with the forked version, like the design and things like that. Basically, I want it to automatically get added to the fork."

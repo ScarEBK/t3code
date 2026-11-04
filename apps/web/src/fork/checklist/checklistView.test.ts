@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vite-plus/test";
 import type { BoardCard } from "./checklistLogic";
 import { buildTaskPrompt } from "./checklistPrompt";
-import { countCards, nextCard, sameProjectName, sectionIconName } from "./checklistView";
+import {
+  countCards,
+  nextCard,
+  pickChatTarget,
+  sameProjectName,
+  sectionIconName,
+} from "./checklistView";
 
 const card = (id: string, patch: Partial<BoardCard>): BoardCard => ({
   id,
@@ -70,5 +76,21 @@ describe("checklist view", () => {
     expect(prompt).toContain("Already done: Checkout.");
     expect(prompt).toContain("Verify webhook signatures");
     expect(prompt).toContain("It's done when this is true: A failed test payment pauses the plan.");
+  });
+});
+
+describe("pickChatTarget", () => {
+  const pc: { environmentId: string } = { environmentId: "pc" };
+  const vps: { environmentId: string } = { environmentId: "vps" };
+  const pick = (vpsHasRoom: boolean, candidates = [pc, vps]) =>
+    pickChatTarget<string, { environmentId: string }>(candidates, {
+      localEnvironmentId: "pc",
+      remoteHasRoom: (id) => id === "vps" && vpsHasRoom,
+    });
+
+  it("opens on the VPS while it has room, then on this PC", () => {
+    expect(pick(true)).toBe(vps);
+    expect(pick(false)).toBe(pc);
+    expect(pick(false, [vps])).toBe(vps);
   });
 });

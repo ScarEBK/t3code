@@ -35,6 +35,7 @@ import { openDeviceSetupDialog } from "./ChatOverlayHosts";
 import { previewEnvironment } from "../../state/preview";
 import { useAtomCommand } from "../../state/use-atom-command";
 import type { ChatShortcutCommands } from "./useChatShortcuts";
+import { useOpenChecklist } from "../../fork/checklist/checklistChat";
 interface RightPanelActionsInput {
   readonly activeThreadRef: ScopedThreadRef | null;
   readonly activeProject: EnvironmentProject | null;
@@ -98,6 +99,11 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
   } = input;
 
   const openPreview = useAtomCommand(previewEnvironment.open, { reportFailure: false });
+  const openChecklist = useOpenChecklist(
+    activeThreadRef && activeProject
+      ? { environmentId: activeThreadRef.environmentId, projectId: activeProject.id }
+      : null,
+  );
   const onToggleDiff = () => {
     if (!isServerThread) {
       return;
@@ -344,7 +350,7 @@ export function useRightPanelActions(input: RightPanelActionsInput) {
     "checklist.toggle": () => {
       if (!activeThreadRef) return;
       if (rightPanelOpen && activeRightPanelSurface?.kind === "checklist") closePreviewPanel();
-      else useRightPanelStore.getState().open(activeThreadRef, "checklist");
+      else openChecklist(activeThreadRef);
     },
   } satisfies ChatShortcutCommands;
 

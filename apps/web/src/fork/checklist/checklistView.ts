@@ -78,3 +78,26 @@ export function sameProjectName(left: string, right: string): boolean {
   const key = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
   return key(left) !== "" && key(left) === key(right);
 }
+
+/** Owner's rule: a linked computer (the VPS) takes new Checklist chats while it runs fewer than this. */
+export const REMOTE_CHAT_LIMIT = 4;
+
+/** Where a new Checklist chat opens: a linked computer with room first, then this one. */
+export function pickChatTarget<Id extends string, P extends { readonly environmentId: Id }>(
+  candidates: ReadonlyArray<P>,
+  input: {
+    readonly localEnvironmentId: Id | null;
+    readonly remoteHasRoom: (environmentId: Id) => boolean;
+  },
+): P | null {
+  return (
+    candidates.find(
+      (candidate) =>
+        candidate.environmentId !== input.localEnvironmentId &&
+        input.remoteHasRoom(candidate.environmentId),
+    ) ??
+    candidates.find((candidate) => candidate.environmentId === input.localEnvironmentId) ??
+    candidates[0] ??
+    null
+  );
+}

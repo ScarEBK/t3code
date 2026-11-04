@@ -69,7 +69,7 @@ export interface ProjectSummary {
   readonly needsYou: number;
 }
 
-const isOpen = (card: BoardCard) => card.status !== "done" && card.status !== "skip";
+export const isOpenCard = (card: BoardCard) => card.status !== "done" && card.status !== "skip";
 
 const byPriorityThenOrder = (a: BoardCard, b: BoardCard) =>
   a.priority - b.priority || a.order - b.order || a.title.localeCompare(b.title);
@@ -124,7 +124,7 @@ export function groupChecklist(
       status: null,
       area,
       cards: inGroup.toSorted((a, b) => statusRank(a) - statusRank(b) || byPriorityThenOrder(a, b)),
-      doneCount: inGroup.filter((card) => !isOpen(card)).length,
+      doneCount: inGroup.filter((card) => !isOpenCard(card)).length,
     }));
 }
 
@@ -132,4 +132,17 @@ export function groupChecklist(
 export function startsCollapsed(group: ChecklistGroup): boolean {
   if (group.status !== null) return group.status === "done" || group.status === "skip";
   return group.doneCount === group.cards.length;
+}
+
+/** A server without the board bridge answers with the web page, which must not read as an empty board. */
+export function parseBoardSnapshot(body: unknown): BoardSnapshot {
+  if (!body || typeof body !== "object" || !("projects" in body) || !Array.isArray(body.projects)) {
+    throw new Error("This computer can't reach the Project Board.");
+  }
+  const snapshot = body as Partial<BoardSnapshot>;
+  return {
+    projects: snapshot.projects ?? [],
+    areas: snapshot.areas ?? [],
+    cards: snapshot.cards ?? [],
+  };
 }

@@ -57,7 +57,10 @@ other PCs see it too. Reading needs read scope; Done / Not yet / Reopen need ope
 the owner. Set `T3CODE_BOARD_URL` if the board uses another port; it must stay on this machine, since the
 board refuses non-loopback callers. The tab shows each app's logo and percent done, sections with
 their own icons, and a button on every job that writes a ready prompt into the chat (or a new chat
-in that app). It re-reads the board every 15 seconds while open. Upstream files touched: `server.ts`
+in that app). It re-reads the board every 15 seconds while open. It always asks this PC's server
+(the primary environment), because a linked VPS runs plain T3 Code and answers with its web page. App tiles
+and Insert open a new chat in the picked app: on the VPS while it runs fewer than 4 chats, otherwise here.
+Ticking several open tasks (the box left of each row) writes one prompt that works through them in order. Upstream files touched: `server.ts`
 (+2, registers the route), `rightPanelStore.ts` and `closedViewStore.ts` (the `checklist` kind),
 `RightPanelTabs.tsx` (menu entries, title, icon), `useRightPanelActions.ts` (the Insert shortcut), `RightPanelSurfaceContent.tsx`, `useRightPanelActions.ts`,
 `ChatView.tsx` and `CommandPalette.tsx`. On a conflict, re-add the `checklist` case next to `side-chat`.
