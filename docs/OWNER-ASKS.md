@@ -1,5 +1,15 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-04 Ohio: True 1:1 clones from the real build, not screenshots
+
+"I'm not happy with the current approach. I want a skill or tool that can truly clone any website one-to-one. [...] They mostly look at screenshots, and I think that's why the designs always come out bad. [...] I want something that decomposes the whole website: HTML, layout, exact spacing, fonts, color schemes, alignment, every small detail of how it's built. Then it should rebuild it from scratch so it looks exactly the same. [...] I shouldn't be able to see any difference between my version and the original. The only exception is copyrighted things like logos."
+
+Picked: build it here on the PC. First test site: linear.app. Code type: "whatever you think is gonna make the best, the most exact same thing" (first copy as close as possible to the original; convert to the project's framework later if Scar likes it).
+
+## 2026-11-04 Ohio: Permission button glitch, are we getting nightlies, how to run several checklist jobs
+
+"The full permission button and similar controls in T3 Code are glitching badly. [...] this is the biggest issue." "If a new update comes out on the nightly, does our app get it too? Yesterday Theo was showing the app, and it doesn't look like ours, especially in the settings." "I don't understand how the new checklist feature is supposed to work. For example, if I want to tell the agent to work on two or three different tasks at the same time, how do I do that?"
+
 ## 2026-11-04 Ohio: Install Reverse Engineer Anything, clone whole sites with our own brand
 
 "I want you to install a skill/tool that lets you fully understand how any website is built so you can recreate it accurately. Install "Reverse Engineer Anything" [...] First check whether there's anything better [...] I give you a website and you use the skill to understand exactly how it works: the full layout, every single font, every small detail. [...] If I ask you to recreate a site, I want you to rebuild the complete site. Leave out their logos, but know exactly where the logos are placed and everything else about the layout. Later, I want to combine sites. For example, take the animations from one website and the complete layout, product presentation, and pictures from another, and merge them. The end goal is to recreate the exact same website but with our own logos, SVGs, and any other assets. Focus on websites first, and apps too. I don't care about games."
