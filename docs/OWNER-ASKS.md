@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-04 Ohio: Install Reverse Engineer Anything, clone whole sites with our own brand
+
+"I want you to install a skill/tool that lets you fully understand how any website is built so you can recreate it accurately. Install "Reverse Engineer Anything" [...] First check whether there's anything better [...] I give you a website and you use the skill to understand exactly how it works: the full layout, every single font, every small detail. [...] If I ask you to recreate a site, I want you to rebuild the complete site. Leave out their logos, but know exactly where the logos are placed and everything else about the layout. Later, I want to combine sites. For example, take the animations from one website and the complete layout, product presentation, and pictures from another, and merge them. The end goal is to recreate the exact same website but with our own logos, SVGs, and any other assets. Focus on websites first, and apps too. I don't care about games."
+
 ## 2026-11-03 Ohio: Stay on nightly, keep the fork, auto-update it
 
 "I want to stay on the nightly version. I know there will probably be some bugs, but they automatically get fixed. Not only that, but I don't want it to be on the official version. I want to stay on this currently forked version. [...] I want it to automatically get all the updates that do not interfere with the forked version, like the design and things like that. Basically, I want it to automatically get added to the fork."
