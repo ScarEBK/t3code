@@ -90,7 +90,7 @@ export function buildTaskPrompt(input: {
     "Build it in small steps that follow the project's existing patterns. Ask me before adding a new dependency or service.",
     "Test it for real: run it, try the edge cases, and fix what breaks.",
     card.proof ? `It's done when this is true: ${card.proof}` : "Tell me how you proved it works.",
-    `When it works, mark card ${card.id} done on the Project Board.`,
+    `When it works, mark card ${card.id} done on the Project Board yourself (board done ${card.id} --proof "..."). Only if it's a look or a choice I must judge, use board review ${card.id} instead and tell me what to check.`,
   ];
   lines.push("", "How to do it:", ...steps.map((step, index) => `${index + 1}. ${step}`));
   lines.push("", "Finish with a short summary of what changed and anything I need to do.");

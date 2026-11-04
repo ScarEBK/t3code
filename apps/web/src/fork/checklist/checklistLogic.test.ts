@@ -4,6 +4,7 @@ import {
   type BoardCard,
   type BoardSnapshot,
   groupChecklist,
+  parseBoardSnapshot,
   summarizeProjects,
 } from "./checklistLogic";
 
@@ -77,5 +78,13 @@ describe("summarizeProjects", () => {
       ["bot", 1, 0, 1],
       ["site", 1, 1, 5],
     ]);
+  });
+});
+
+describe("parseBoardSnapshot", () => {
+  it("rejects a server that answers with its web page instead of the board", () => {
+    expect(() => parseBoardSnapshot(null)).toThrow();
+    expect(() => parseBoardSnapshot({ error: "nope" })).toThrow();
+    expect(parseBoardSnapshot({ projects: [] })).toEqual({ projects: [], areas: [], cards: [] });
   });
 });

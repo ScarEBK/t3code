@@ -11,7 +11,7 @@ import { Atom, AtomRegistry } from "effect/reactivity";
 import { connectionAtomRuntime } from "~/connection/runtime";
 import { appAtomRegistry } from "~/rpc/atomRegistry";
 import { environmentSession } from "~/state/session";
-import type { BoardSnapshot, BoardStatus } from "./checklistLogic";
+import { parseBoardSnapshot, type BoardSnapshot, type BoardStatus } from "./checklistLogic";
 
 // Must match BOARD_ROUTE_PREFIX in apps/server/src/fork/BoardProxy.ts.
 const BOARD_BASE_PATH = "/api/fork/board";
@@ -65,14 +65,22 @@ async function boardRequest(
           : `The board answered ${response.status}.`;
       throw new Error(message);
     }
+    if (body === null) throw new Error("This computer can't reach the Project Board.");
     return body;
   }
   throw new Error("Can't reach this computer right now.");
 }
 
+// There is one board, so the last good answer shows at once when the panel opens again.
+let lastBoard: BoardSnapshot | null = null;
+
+export function peekBoard(): BoardSnapshot | null {
+  return lastBoard;
+}
+
 export async function loadBoard(environmentId: EnvironmentId): Promise<BoardSnapshot> {
-  const body = (await boardRequest(environmentId, "/all", "GET")) as Partial<BoardSnapshot> | null;
-  return { projects: body?.projects ?? [], areas: body?.areas ?? [], cards: body?.cards ?? [] };
+  lastBoard = parseBoardSnapshot(await boardRequest(environmentId, "/all", "GET"));
+  return lastBoard;
 }
 
 export async function setCardStatus(

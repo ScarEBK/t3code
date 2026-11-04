@@ -1,4 +1,3 @@
-import { scopeProjectRef, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import type { EnvironmentId, ProjectId } from "@t3tools/contracts";
 import {
   ArrowRightIcon,
@@ -55,13 +54,12 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { toastManager } from "~/components/ui/toast";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "~/components/ui/tooltip";
 import { useComposerHandleContext } from "~/composerHandleContext";
-import { useNewThreadHandler } from "~/hooks/useHandleNewThread";
 import { cn } from "~/lib/utils";
-import { useRightPanelStore } from "~/rightPanelStore";
-import { useProjects } from "~/state/entities";
+import { usePrimaryEnvironmentId } from "~/state/environments";
 import fiveHubLogo from "./5hub-logo.png";
 import motionLifeLogo from "./motion-life-logo.png";
-import { loadBoard, setCardStatus } from "./boardClient";
+import { loadBoard, peekBoard, setCardStatus } from "./boardClient";
+import { readPickedApp, storePickedApp, useOpenAppChat } from "./checklistChat";
 import {
   PRIORITY_LABEL,
   groupChecklist,
@@ -86,7 +84,6 @@ import {
 // Layout follows Z Code's status panel (32px rows, 13px text, 14px icons, quiet section labels).
 // Colors are T3's tokens: green only means done, amber only means it waits on you.
 const POLL_MS = 15_000;
-const PROJECT_KEY = "t3code:fork:checklist:project";
 const ROW_HOVER = "hover:bg-black/[0.035] dark:hover:bg-white/[0.08]";
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring";
@@ -134,22 +131,6 @@ const LOGOS: ReadonlyArray<readonly [string, string]> = [
   ["motion-life", motionLifeLogo],
 ];
 
-function readStoredProject(): string | null {
-  try {
-    return window.localStorage.getItem(PROJECT_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function storeProject(id: string) {
-  try {
-    window.localStorage.setItem(PROJECT_KEY, id);
-  } catch {
-    // Remembering the pick is a convenience only.
-  }
-}
-
 function AppMark(props: { readonly project: BoardProject; readonly size: "sm" | "md" | "lg" }) {
   const { project } = props;
   const logo = LOGOS.find(([prefix]) => project.id.startsWith(prefix))?.[1] ?? null;
@@ -172,45 +153,10 @@ function AppMark(props: { readonly project: BoardProject; readonly size: "sm" | 
   );
 }
 
-/** Opens a new chat in the T3 project matching a board app, keeping the Checklist beside it. */
-function useOpenAppChat(currentProjectId: ProjectId | null) {
-  const handleNewThread = useNewThreadHandler();
-  const projects = useProjects();
-  const findTarget = (boardProject: BoardProject) =>
-    projects.find(
-      (project) => !project.archivedAt && sameProjectName(project.title, boardProject.name),
-    ) ?? null;
-  const openChat = (boardProject: BoardProject, prompt?: string) => {
-    const target = findTarget(boardProject);
-    if (!target) {
-      toastManager.add({
-        type: "error",
-        title: `No project named ${boardProject.name}`,
-        description: "Add its folder as a project in T3 Code first.",
-      });
-      return;
-    }
-    handleNewThread(scopeProjectRef(target.environmentId, target.id), prompt ? { prompt } : {})
-      .then((created) => {
-        if (created) {
-          useRightPanelStore
-            .getState()
-            .open(scopeThreadRef(target.environmentId, created.threadId), "checklist");
-        }
-      })
-      .catch(() =>
-        toastManager.add({ type: "error", title: `Couldn't open a new chat in ${target.title}` }),
-      );
-  };
-  const isCurrent = (boardProject: BoardProject) =>
-    findTarget(boardProject)?.id === currentProjectId;
-  return { openChat, isCurrent };
-}
-
 /** Into this chat for its own app; a new chat in the matching app otherwise. */
-function useSendPrompt(currentProjectId: ProjectId | null) {
+function useSendPrompt(appChat: ReturnType<typeof useOpenAppChat>) {
   const composerRef = useComposerHandleContext();
-  const { openChat, isCurrent } = useOpenAppChat(currentProjectId);
+  const { openChat, isCurrent } = appChat;
   return (prompt: string, boardProject: BoardProject) => {
     if (!isCurrent(boardProject)) {
       openChat(boardProject, prompt);
@@ -234,17 +180,22 @@ export function ChecklistPanel(props: {
   readonly visible: boolean;
   readonly currentProjectId?: ProjectId | null;
 }) {
-  const { environmentId, visible } = props;
+  const { visible } = props;
   const currentProjectId = props.currentProjectId ?? null;
-  const [snapshot, setSnapshot] = useState<BoardSnapshot | null>(null);
+  // The board bridge is the fork's, so it lives on this computer's server, not on a linked VPS.
+  const environmentId = usePrimaryEnvironmentId() ?? props.environmentId;
+  const [snapshot, setSnapshot] = useState<BoardSnapshot | null>(peekBoard);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [pickedId, setPickedId] = useState(readStoredProject);
+  const chatKey = `${props.environmentId}:${currentProjectId}`;
+  const [picked, setPicked] = useState<{ id: string; chatKey: string } | null>(null);
   const [busyCardId, setBusyCardId] = useState<string | null>(null);
-  const currentTitle =
-    useProjects().find((project) => project.id === currentProjectId)?.title ?? null;
-  const send = useSendPrompt(currentProjectId);
-  const appChat = useOpenAppChat(currentProjectId);
+  const appChat = useOpenAppChat({
+    environmentId: props.environmentId,
+    projectId: currentProjectId,
+  });
+  const currentTitle = appChat.currentTitle;
+  const send = useSendPrompt(appChat);
 
   const pull = async () => {
     try {
@@ -326,8 +277,14 @@ export function ChecklistPanel(props: {
   const fromChat = currentTitle
     ? summaries.find((entry) => sameProjectName(entry.project.name, currentTitle))
     : undefined;
+  const byId = (id: string | undefined) => summaries.find((entry) => entry.project.id === id);
+  // A tile picked in this chat wins; otherwise the chat's own app, then the last app picked.
   const selected =
-    summaries.find((entry) => entry.project.id === pickedId) ?? fromChat ?? summaries[0] ?? null;
+    (picked?.chatKey === chatKey ? byId(picked.id) : undefined) ??
+    fromChat ??
+    byId(readPickedApp()?.id) ??
+    summaries[0] ??
+    null;
 
   if (!selected) {
     return <PanelMessage title="No apps on the board yet" />;
@@ -366,8 +323,8 @@ export function ChecklistPanel(props: {
                 counts={countCards(projectCards(snapshot, entry.project.id))}
                 selected={entry.project.id === selected.project.id}
                 onSelect={() => {
-                  setPickedId(entry.project.id);
-                  storeProject(entry.project.id);
+                  setPicked({ id: entry.project.id, chatKey });
+                  storePickedApp(entry.project);
                   if (!appChat.isCurrent(entry.project)) appChat.openChat(entry.project);
                 }}
               />

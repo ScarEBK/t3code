@@ -133,3 +133,16 @@ export function startsCollapsed(group: ChecklistGroup): boolean {
   if (group.status !== null) return group.status === "done" || group.status === "skip";
   return group.doneCount === group.cards.length;
 }
+
+/** A server without the board bridge answers with the web page, which must not read as an empty board. */
+export function parseBoardSnapshot(body: unknown): BoardSnapshot {
+  if (!body || typeof body !== "object" || !("projects" in body) || !Array.isArray(body.projects)) {
+    throw new Error("This computer can't reach the Project Board.");
+  }
+  const snapshot = body as Partial<BoardSnapshot>;
+  return {
+    projects: snapshot.projects ?? [],
+    areas: snapshot.areas ?? [],
+    cards: snapshot.cards ?? [],
+  };
+}
