@@ -217,7 +217,7 @@ export function ComposerControlsBar(props: {
       modelOptionsByInstance={modelOptionsByInstance}
       size={controlSize}
       triggerClassName={cn(
-        "group/model-trigger ms-auto",
+        "group/model-trigger",
         MODEL_TRIGGER_STATES,
         composerControlsCollapsed ? "min-w-13 shrink text-xs!" : "min-w-13",
       )}
@@ -314,7 +314,8 @@ export function ComposerControlsBar(props: {
         </div>
       </>
 
-      {composerModelPicker}
+      {/* A wrapper, not ms-auto: the fit measurement counts the picker's margins as its width. */}
+      <div className="flex min-w-0 flex-1 justify-end">{composerModelPicker}</div>
     </>
   );
 }
