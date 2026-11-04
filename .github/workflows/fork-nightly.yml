@@ -41,6 +41,7 @@ jobs:
           git config user.name "fork-nightly[bot]"
           git config user.email "fork-nightly@users.noreply.github.com"
           git remote add upstream https://github.com/pingdotgg/t3code.git
+          base=$(git rev-parse HEAD)
           if ! node scripts/fork-sync.ts; then
             git merge --abort || true
             title="Upstream nightly needs a hand merge"
@@ -48,6 +49,12 @@ jobs:
               gh issue create --title "$title" --body "The scheduled sync hit a merge conflict. Run \`vp run fork:sync\` locally, fix the files it lists (see FORK.md), and push main. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             fi
             exit 1
+          fi
+          # The job token may not push workflow files, so upstream CI edits stay out of the fork.
+          if ! git diff --quiet "$base" HEAD -- .github/workflows; then
+            git rm -rq .github/workflows
+            git checkout "$base" -- .github/workflows
+            git commit --amend --no-edit
           fi
           git push origin HEAD:main
 
