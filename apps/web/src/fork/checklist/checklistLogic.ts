@@ -69,7 +69,7 @@ export interface ProjectSummary {
   readonly needsYou: number;
 }
 
-const isOpen = (card: BoardCard) => card.status !== "done" && card.status !== "skip";
+export const isOpenCard = (card: BoardCard) => card.status !== "done" && card.status !== "skip";
 
 const byPriorityThenOrder = (a: BoardCard, b: BoardCard) =>
   a.priority - b.priority || a.order - b.order || a.title.localeCompare(b.title);
@@ -124,7 +124,7 @@ export function groupChecklist(
       status: null,
       area,
       cards: inGroup.toSorted((a, b) => statusRank(a) - statusRank(b) || byPriorityThenOrder(a, b)),
-      doneCount: inGroup.filter((card) => !isOpen(card)).length,
+      doneCount: inGroup.filter((card) => !isOpenCard(card)).length,
     }));
 }
 

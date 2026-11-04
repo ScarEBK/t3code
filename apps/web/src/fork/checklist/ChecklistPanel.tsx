@@ -42,6 +42,8 @@ import {
   Shield,
   ShoppingCart,
   Smartphone,
+  SquareCheckIcon,
+  SquareIcon,
   Star,
   User,
   Users,
@@ -63,6 +65,7 @@ import { readPickedApp, storePickedApp, useOpenAppChat } from "./checklistChat";
 import {
   PRIORITY_LABEL,
   groupChecklist,
+  isOpenCard,
   startsCollapsed,
   summarizeProjects,
   type BoardCard,
@@ -70,7 +73,7 @@ import {
   type BoardSnapshot,
   type ChecklistGroup,
 } from "./checklistLogic";
-import { buildTaskPrompt } from "./checklistPrompt";
+import { buildMultiTaskPrompt, buildTaskPrompt } from "./checklistPrompt";
 import { ROW_TEXT } from "./checklistStyles";
 import {
   countCards,
@@ -190,6 +193,10 @@ export function ChecklistPanel(props: {
   const chatKey = `${props.environmentId}:${currentProjectId}`;
   const [picked, setPicked] = useState<{ id: string; chatKey: string } | null>(null);
   const [busyCardId, setBusyCardId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<{ appId: string; ids: ReadonlyArray<string> }>({
+    appId: "",
+    ids: [],
+  });
   const appChat = useOpenAppChat({
     environmentId: props.environmentId,
     projectId: currentProjectId,
@@ -296,8 +303,10 @@ export function ChecklistPanel(props: {
   const waiting = cards
     .filter((card) => card.status === "review")
     .toSorted((a, b) => a.priority - b.priority || a.order - b.order);
+  const groupOf = (card: BoardCard) =>
+    groups.find((entry) => entry.cards.some((item) => item.id === card.id));
   const promptFor = (card: BoardCard) => {
-    const group = groups.find((entry) => entry.cards.some((item) => item.id === card.id));
+    const group = groupOf(card);
     return buildTaskPrompt({
       projectName: selected.project.name,
       sectionName: group?.label ?? "Other",
@@ -305,8 +314,39 @@ export function ChecklistPanel(props: {
       card,
     });
   };
+  const appId = selected.project.id;
+  // Picks stay in the order they were made and drop out once a card closes.
+  const chosen =
+    selection.appId === appId
+      ? selection.ids.flatMap((id) => cards.filter((card) => card.id === id && isOpenCard(card)))
+      : [];
+  const toggleCard = (card: BoardCard) =>
+    setSelection((previous) => {
+      const ids = previous.appId === appId ? previous.ids : [];
+      return {
+        appId,
+        ids: ids.includes(card.id) ? ids.filter((id) => id !== card.id) : [...ids, card.id],
+      };
+    });
+  const clearChosen = () => setSelection({ appId: "", ids: [] });
+  const sendChosen = () => {
+    const [first] = chosen;
+    if (!first) return;
+    send(
+      chosen.length === 1
+        ? promptFor(first)
+        : buildMultiTaskPrompt({
+            projectName: selected.project.name,
+            tasks: chosen.map((card) => ({ card, sectionName: groupOf(card)?.label ?? "Other" })),
+          }),
+      selected.project,
+    );
+    clearChosen();
+  };
   const rowProps: RowProps = {
     busyCardId,
+    chosenIds: new Set(chosen.map((card) => card.id)),
+    onToggle: toggleCard,
     onPrompt: (card) => send(promptFor(card), selected.project),
     onStatus: (card, status) => void changeStatus(card, status),
   };
@@ -361,6 +401,20 @@ export function ChecklistPanel(props: {
           </div>
         </div>
       </ScrollArea>
+      {chosen.length > 0 ? (
+        <div className="flex shrink-0 items-center gap-2 border-t border-border px-3 py-2">
+          <span className={cn(ROW_TEXT, "flex-1 text-foreground tabular-nums")}>
+            {chosen.length} {chosen.length === 1 ? "task" : "tasks"} picked
+          </span>
+          <Button size="sm" variant="ghost" onClick={clearChosen}>
+            Clear
+          </Button>
+          <Button size="sm" onClick={sendChosen}>
+            <MessageSquarePlusIcon />
+            Write prompt
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -614,6 +668,8 @@ function Section(props: {
 
 type RowProps = {
   readonly busyCardId: string | null;
+  readonly chosenIds: ReadonlySet<string>;
+  readonly onToggle: (card: BoardCard) => void;
   readonly onPrompt: (card: BoardCard) => void;
   readonly onStatus: (card: BoardCard, status: BoardCard["status"]) => void;
 };
@@ -697,6 +753,44 @@ function StatusIcon({ status }: { readonly status: BoardCard["status"] }) {
   return <CircleIcon aria-hidden className={cn(base, "text-muted-foreground/60")} />;
 }
 
+/** Open tasks show their status until hovered or while picking, then a box to pick them. */
+function PickBox(props: {
+  readonly card: BoardCard;
+  readonly chosen: boolean;
+  readonly picking: boolean;
+  readonly onToggle: (card: BoardCard) => void;
+}) {
+  const box = "mt-0.5 size-3.5 shrink-0";
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={props.chosen}
+      aria-label={`Pick ${props.card.title}`}
+      onClick={() => props.onToggle(props.card)}
+      className={cn("flex shrink-0 rounded-sm", FOCUS_RING)}
+    >
+      {props.chosen ? (
+        <SquareCheckIcon aria-hidden className={cn(box, "text-foreground")} />
+      ) : (
+        <>
+          <span className={cn("contents", props.picking ? "hidden" : "group-hover/task:hidden")}>
+            <StatusIcon status={props.card.status} />
+          </span>
+          <SquareIcon
+            aria-hidden
+            className={cn(
+              box,
+              "text-muted-foreground",
+              props.picking ? "block" : "hidden group-hover/task:block",
+            )}
+          />
+        </>
+      )}
+    </button>
+  );
+}
+
 function PriorityBars({ priority }: { readonly priority: number }) {
   const level = 4 - Math.min(3, Math.max(1, priority));
   return (
@@ -741,7 +835,16 @@ function TaskRow(props: RowProps & { readonly card: BoardCard; readonly showNeed
       data-board-status={card.status}
       className={cn("group/task flex min-h-7 items-start gap-2 rounded-md px-1.5 py-1", ROW_HOVER)}
     >
-      <StatusIcon status={card.status} />
+      {closed ? (
+        <StatusIcon status={card.status} />
+      ) : (
+        <PickBox
+          card={card}
+          chosen={props.chosenIds.has(card.id)}
+          picking={props.chosenIds.size > 0}
+          onToggle={props.onToggle}
+        />
+      )}
       <button
         type="button"
         aria-expanded={details.length > 0 ? expanded : undefined}

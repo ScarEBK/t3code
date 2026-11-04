@@ -59,6 +59,19 @@ function listNames(cards: ReadonlyArray<BoardCard>, limit = 4): string {
   return rest > 0 ? `${names.join("; ")} and ${rest} more` : names.join("; ");
 }
 
+const BUILD_STEP =
+  "Build it in small steps that follow the project's existing patterns. Ask me before adding a new dependency or service.";
+
+function markDoneStep(cardId: string): string {
+  return `When it works, mark card ${cardId} done on the Project Board yourself (board done ${cardId} --proof "..."). Only if it's a look or a choice I must judge, use board review ${cardId} instead and tell me what to check.`;
+}
+
+function cardContext(card: BoardCard): string {
+  return [card.why, card.status === "review" ? card.needs : ""].filter(Boolean).join(" ");
+}
+
+const inProgress = (card: BoardCard) => card.status === "doing" || card.status === "review";
+
 /** A ready-to-send brief for one Project Board card, with its section for context. */
 export function buildTaskPrompt(input: {
   readonly projectName: string;
@@ -72,12 +85,12 @@ export function buildTaskPrompt(input: {
     (entry) => entry.status !== "done" && entry.status !== "skip" && entry.id !== card.id,
   );
   const lines: string[] = [
-    card.status === "doing" || card.status === "review"
+    inProgress(card)
       ? `Let's finish "${card.title}" in ${projectName} (${sectionName}). It's already in progress, so first check what's done in the code and pick up from there.`
       : `Let's build "${card.title}" in ${projectName} (${sectionName}).`,
   ];
-  const context = [card.why, card.status === "review" ? card.needs : ""].filter(Boolean);
-  if (context.length > 0) lines.push("", `Context: ${context.join(" ")}`);
+  const context = cardContext(card);
+  if (context) lines.push("", `Context: ${context}`);
   lines.push(
     "",
     `Where ${sectionName} stands: ${done.length} of ${sectionCards.length} done.` +
@@ -87,12 +100,48 @@ export function buildTaskPrompt(input: {
   const steps = [
     "Read the code this touches first, and tell me in two lines how it works today.",
     ...areaSteps(`${card.title} ${card.why} ${sectionName}`),
-    "Build it in small steps that follow the project's existing patterns. Ask me before adding a new dependency or service.",
+    BUILD_STEP,
     "Test it for real: run it, try the edge cases, and fix what breaks.",
     card.proof ? `It's done when this is true: ${card.proof}` : "Tell me how you proved it works.",
-    `When it works, mark card ${card.id} done on the Project Board yourself (board done ${card.id} --proof "..."). Only if it's a look or a choice I must judge, use board review ${card.id} instead and tell me what to check.`,
+    markDoneStep(card.id),
   ];
   lines.push("", "How to do it:", ...steps.map((step, index) => `${index + 1}. ${step}`));
   lines.push("", "Finish with a short summary of what changed and anything I need to do.");
+  return lines.join("\n");
+}
+
+/** One brief for several cards, worked one after another in the order given. */
+export function buildMultiTaskPrompt(input: {
+  readonly projectName: string;
+  readonly tasks: ReadonlyArray<{ readonly card: BoardCard; readonly sectionName: string }>;
+}): string {
+  const { projectName, tasks } = input;
+  const lines: string[] = [
+    `Let's work through these ${tasks.length} tasks in ${projectName}, one at a time and in this order. Finish and prove each one before you start the next.`,
+  ];
+  tasks.forEach(({ card, sectionName }, index) => {
+    lines.push("", `${index + 1}. ${card.title} (${sectionName}, card ${card.id})`);
+    if (inProgress(card)) {
+      lines.push(
+        "   Already in progress: check what's done in the code first and pick up from there.",
+      );
+    }
+    const context = cardContext(card);
+    if (context) lines.push(`   Context: ${context}`);
+    if (card.proof) lines.push(`   Done when: ${card.proof}`);
+  });
+  const hints = new Set(
+    tasks.flatMap(({ card, sectionName }) => areaSteps(`${card.title} ${card.why} ${sectionName}`)),
+  );
+  const steps = [
+    "First read the code these touch, then tell me in a few lines how it works today and your plan for each task.",
+    ...hints,
+    BUILD_STEP,
+    "Test each task for real before moving on: run it, try the edge cases, and fix what breaks.",
+    markDoneStep("<card id>"),
+    "If a task is blocked, tell me why, leave its card as it is, and go on to the next one.",
+  ];
+  lines.push("", "How to do each one:", ...steps.map((step, index) => `${index + 1}. ${step}`));
+  lines.push("", "Finish with a short summary per task: what changed and anything I need to do.");
   return lines.join("\n");
 }

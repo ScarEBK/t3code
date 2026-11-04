@@ -1,5 +1,9 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-03 Ohio: Pick several Checklist tasks, one combined prompt
+
+"I'm leaving the design stuff Until the end [...] I wanna be able you know to select for example one two three you know and have a agent to basically work on all three tasks um like you know after he gets done with one it will go to the next Uh and like it will add all of them like into the same prompt basically [...] a whole section is not important just as long as I can do multiple tasks and it will basically add the prompt with each other and write like a better prompt as well"
+
 ## 2026-11-03 Ohio: "No apps on the board yet" keeps showing, Insert and tiles should open a chat
 
 Insert key: "Open + new chat if needed" (opens the Checklist; new chat in the picked app only if the current chat is a different app).
