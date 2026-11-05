@@ -1,5 +1,11 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-05 Ohio: Every PC and VPS session should show on my phone
+
+"I have the T3 Code app on my phone, but I can't reliably see my sessions there, especially the ones on my VPS. [...] Sessions running on my VPS mostly don't show up on my phone. Sometimes a few appear, but usually I can't find them, and I don't know why. [...] Any session running on my PC or on my VPS should show on my phone, as long as my PC is on. [...] I want to use my phone to prompt the agent in those sessions and follow what it's doing. [...] I don't know if the problem is the connection, the account, or something else." "Basically, I'm offering everything so I'm not sure why that's the case."
+
+Answer: VPS works fine on the phone ("they work"). The real break was the PC (Desktop-KETNT): "sent an unexpected answer", invalid_response. Cause: PC clock ~68s slow with Windows Time off, so the PC rejected phone sign-ins ("iat in the future", limit 60s). Fixed 2026-11-05: Windows Time on + Automatic, clock synced. VPS update to newest stable: "Yes, when it's idle" (watcher `t3-update-when-idle` on the VPS, log ~/t3-update-when-idle.log).
+
 ## 2026-11-04 Ohio: True 1:1 clones from the real build, not screenshots
 
 "I'm not happy with the current approach. I want a skill or tool that can truly clone any website one-to-one. [...] They mostly look at screenshots, and I think that's why the designs always come out bad. [...] I want something that decomposes the whole website: HTML, layout, exact spacing, fonts, color schemes, alignment, every small detail of how it's built. Then it should rebuild it from scratch so it looks exactly the same. [...] I shouldn't be able to see any difference between my version and the original. The only exception is copyrighted things like logos."
