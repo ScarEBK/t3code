@@ -42,7 +42,7 @@ export interface SettlementPullRequest {
   readonly mergedAt?: string | null;
 }
 
-const DAY_MS = 24 * 60 * 60 * 1_000;
+const HOUR_MS = 60 * 60 * 1_000;
 const QUEUED_TURN_START_GRACE_MS = 2 * 60 * 1_000;
 
 function toMillis(value: DateTime.Utc | null | undefined): number | null {
@@ -189,7 +189,7 @@ export function resolveAutoSettlementAt(input: {
   readonly thread: ProjectionStore.ProjectionSettlementCandidate;
   readonly pullRequest: SettlementPullRequest | null;
   readonly nowMs: number;
-  readonly autoSettleAfterDays: number | null;
+  readonly autoSettleAfterHours: number | null;
   readonly autoSettleOnMerge: boolean;
   readonly autoSettleKeepPullRequests?: boolean;
 }): DateTime.Utc | null {
@@ -232,13 +232,13 @@ export function resolveAutoSettlementAt(input: {
     thread.linkedPullRequest != null ||
     thread.branchPullRequest != null;
   if (input.autoSettleKeepPullRequests === true && hasPullRequest) return null;
-  if (input.autoSettleAfterDays === null) return null;
+  if (input.autoSettleAfterHours === null) return null;
   const snoozedUntilMs = toMillis(thread.snoozedUntil);
   const timerWakeAtMs =
     snoozedUntilMs !== null && snoozedUntilMs <= input.nowMs ? snoozedUntilMs : null;
   const inactivityAtMs =
     latestMillis([activityAtMs, toMillis(thread.lastSnoozeWakeAt), timerWakeAtMs]) ?? activityAtMs;
-  return inactivityAtMs < input.nowMs - input.autoSettleAfterDays * DAY_MS
+  return inactivityAtMs < input.nowMs - input.autoSettleAfterHours * HOUR_MS
     ? DateTime.makeUnsafe(inactivityAtMs)
     : null;
 }
@@ -252,13 +252,14 @@ export class ThreadSettlementServiceV2 extends Context.Service<
 >()("t3/orchestration-v2/ThreadSettlementService/ThreadSettlementServiceV2") {}
 
 function autoSettlementConfigured(settings: import("@t3tools/contracts").ServerSettings): boolean {
-  if (settings.sidebarAutoSettleOnMerge || settings.sidebarAutoSettleAfterDays !== null) {
+  if (settings.sidebarAutoSettleOnMerge || settings.sidebarAutoSettleAfterHours !== null) {
     return true;
   }
   return Object.values(settings.projectSettingsOverrides).some(
     (entry) =>
       entry.sidebarAutoSettleOnMerge === true ||
-      (entry.sidebarAutoSettleAfterDays !== undefined && entry.sidebarAutoSettleAfterDays !== null),
+      (entry.sidebarAutoSettleAfterHours !== undefined &&
+        entry.sidebarAutoSettleAfterHours !== null),
   );
 }
 
@@ -268,22 +269,22 @@ export function autoSettlementSettingsKey(
 ): string {
   return JSON.stringify([
     settings.sidebarAutoSettleOnMerge,
-    settings.sidebarAutoSettleAfterDays,
+    settings.sidebarAutoSettleAfterHours,
     settings.sidebarAutoSettleKeepPullRequests,
     Object.entries(settings.projectSettingsOverrides)
       .filter(
         ([, entry]) =>
           entry.sidebarAutoSettleOnMerge !== undefined ||
-          entry.sidebarAutoSettleAfterDays !== undefined ||
+          entry.sidebarAutoSettleAfterHours !== undefined ||
           entry.sidebarAutoSettleKeepPullRequests !== undefined,
       )
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([projectId, entry]) => [
         projectId,
         entry.sidebarAutoSettleOnMerge ?? "inherit",
-        entry.sidebarAutoSettleAfterDays === undefined
+        entry.sidebarAutoSettleAfterHours === undefined
           ? "inherit"
-          : entry.sidebarAutoSettleAfterDays,
+          : entry.sidebarAutoSettleAfterHours,
         entry.sidebarAutoSettleKeepPullRequests ?? "inherit",
       ]),
   ]);
@@ -336,7 +337,7 @@ export const make = Effect.gen(function* () {
           thread,
           pullRequest,
           nowMs: DateTime.toEpochMillis(decisionNow),
-          autoSettleAfterDays: currentSettings.sidebarAutoSettleAfterDays,
+          autoSettleAfterHours: currentSettings.sidebarAutoSettleAfterHours,
           autoSettleOnMerge: currentSettings.sidebarAutoSettleOnMerge,
           autoSettleKeepPullRequests: currentSettings.sidebarAutoSettleKeepPullRequests,
         });
@@ -373,7 +374,7 @@ export const make = Effect.gen(function* () {
           thread,
           pullRequest: null,
           nowMs,
-          autoSettleAfterDays: projectSettings.sidebarAutoSettleAfterDays,
+          autoSettleAfterHours: projectSettings.sidebarAutoSettleAfterHours,
           autoSettleOnMerge: projectSettings.sidebarAutoSettleOnMerge,
           autoSettleKeepPullRequests: projectSettings.sidebarAutoSettleKeepPullRequests,
         });
@@ -452,7 +453,7 @@ export const make = Effect.gen(function* () {
             thread,
             pullRequest,
             nowMs: DateTime.toEpochMillis(decisionNow),
-            autoSettleAfterDays: settings.sidebarAutoSettleAfterDays,
+            autoSettleAfterHours: settings.sidebarAutoSettleAfterHours,
             autoSettleOnMerge: settings.sidebarAutoSettleOnMerge,
             autoSettleKeepPullRequests: settings.sidebarAutoSettleKeepPullRequests,
           }) !== null

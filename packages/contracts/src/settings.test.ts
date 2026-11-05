@@ -21,8 +21,8 @@ import {
   resolveProviderInstanceEnabled,
   ServerSettings,
   ServerSettingsPatch,
-  sidebarAutoSettleDaysToHours,
-  sidebarAutoSettleHoursToDays,
+  migrateSavedAutoSettle,
+  sidebarAutoSettlePatch,
   withIdleCompaction,
 } from "./settings.ts";
 
@@ -350,21 +350,35 @@ describe("provider enabled defaults", () => {
 });
 
 describe("ServerSettings auto-settle window", () => {
-  it("defaults to four hours and accepts whole hours down to one", () => {
-    expect(
-      sidebarAutoSettleDaysToHours(decodeServerSettings({}).sidebarAutoSettleAfterDays ?? 0),
-    ).toBe(4);
-    expect(decodeServerSettings({ sidebarAutoSettleAfterDays: 1 }).sidebarAutoSettleAfterDays).toBe(
-      1,
-    );
+  it("defaults to four hours while sending official clients a day count they accept", () => {
+    const encoded = encodeServerSettings(decodeServerSettings({}));
+    expect(encoded.sidebarAutoSettleAfterHours).toBe(4);
+    expect(encoded.sidebarAutoSettleAfterDays).toBe(1);
+    expect(() => decodeServerSettingsPatch({ sidebarAutoSettleAfterDays: 4 / 24 })).toThrow();
+  });
+
+  it("accepts whole hours down to one and pairs each with a valid day count", () => {
     for (let hours = 1; hours <= MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS; hours += 1) {
-      const days = sidebarAutoSettleHoursToDays(hours);
-      expect(decodeServerSettingsPatch({ sidebarAutoSettleAfterDays: days })).toEqual({
-        sidebarAutoSettleAfterDays: days,
-      });
-      expect(sidebarAutoSettleDaysToHours(days)).toBe(hours);
+      const patch = sidebarAutoSettlePatch(hours);
+      expect(decodeServerSettingsPatch(patch)).toEqual(patch);
     }
-    expect(() => decodeServerSettingsPatch({ sidebarAutoSettleAfterDays: 0.5 / 24 })).toThrow();
+    expect(() => decodeServerSettingsPatch({ sidebarAutoSettleAfterHours: 0.5 })).toThrow();
+  });
+
+  it("keeps saved day values, Never, and older part-day saves when loading", () => {
+    const load = (raw: unknown) => decodeServerSettings(migrateSavedAutoSettle(raw));
+    const never = load({ sidebarAutoSettleAfterDays: null });
+    expect(never.sidebarAutoSettleAfterHours).toBeNull();
+    expect(load({ sidebarAutoSettleAfterDays: 7 }).sidebarAutoSettleAfterHours).toBe(168);
+    const partDay = load({
+      sidebarAutoSettleAfterDays: 8 / 24,
+      projectSettingsOverrides: { one: { sidebarAutoSettleAfterDays: null } },
+    });
+    expect(partDay.sidebarAutoSettleAfterHours).toBe(8);
+    expect(partDay.sidebarAutoSettleAfterDays).toBe(1);
+    expect(
+      Object.values(partDay.projectSettingsOverrides)[0]?.sidebarAutoSettleAfterHours,
+    ).toBeNull();
   });
 });
 

@@ -75,19 +75,90 @@ export const SidebarProjectGroupingMode = Schema.Literals([
 ]);
 export type SidebarProjectGroupingMode = typeof SidebarProjectGroupingMode.Type;
 const DEFAULT_SIDEBAR_PROJECT_GROUPING_MODE: SidebarProjectGroupingMode = "repository";
-export const MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS = 1;
-export const MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS = 90 * 24;
-/** Stays in days so saved settings and project overrides keep their meaning; clients edit hours. */
+const MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS = 1;
+const MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS = 90;
+// Official clients reject the whole settings payload when this leaves 1-90, so it keeps their range.
 export const SidebarAutoSettleAfterDays = Schema.Number.check(
   Schema.isBetween({
-    minimum: MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS / 24,
-    maximum: MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS / 24,
+    minimum: MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
+    maximum: MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
   }),
 );
 export type SidebarAutoSettleAfterDays = typeof SidebarAutoSettleAfterDays.Type;
-const DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_DAYS: SidebarAutoSettleAfterDays = 4 / 24;
-export const sidebarAutoSettleDaysToHours = (days: number) => Math.round(days * 24);
-export const sidebarAutoSettleHoursToDays = (hours: number) => hours / 24;
+export const MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS = 1;
+export const MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS = MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS * 24;
+/** Fork-only; wins over the days field, which official clients still read and write. */
+export const SidebarAutoSettleAfterHours = Schema.Int.check(
+  Schema.isBetween({
+    minimum: MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+    maximum: MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+  }),
+);
+export type SidebarAutoSettleAfterHours = typeof SidebarAutoSettleAfterHours.Type;
+export const DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS: SidebarAutoSettleAfterHours = 4;
+const sidebarAutoSettleDaysForHours = (hours: number): SidebarAutoSettleAfterDays =>
+  Math.min(
+    MAX_SIDEBAR_AUTO_SETTLE_AFTER_DAYS,
+    Math.max(MIN_SIDEBAR_AUTO_SETTLE_AFTER_DAYS, Math.round(hours / 24)),
+  );
+const DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_DAYS = sidebarAutoSettleDaysForHours(
+  DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+);
+/** Writes both fields so fork servers get the hours and official servers a valid day count. */
+export const sidebarAutoSettlePatch = (hours: SidebarAutoSettleAfterHours | null) => ({
+  sidebarAutoSettleAfterHours: hours,
+  sidebarAutoSettleAfterDays: hours === null ? null : sidebarAutoSettleDaysForHours(hours),
+});
+/** Saved settings may hold only days, or the part-day values older fork builds wrote there. */
+export const migrateSavedAutoSettle = (raw: unknown): unknown => {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return raw;
+  const record = raw as Record<string, unknown>;
+  const overrides = record.projectSettingsOverrides;
+  const migratedOverrides =
+    typeof overrides === "object" && overrides !== null && !Array.isArray(overrides)
+      ? Object.fromEntries(
+          Object.entries(overrides).map(([projectId, entry]) => [
+            projectId,
+            migrateSavedAutoSettleEntry(entry),
+          ]),
+        )
+      : overrides;
+  return {
+    ...(migrateSavedAutoSettleEntry(record) as Record<string, unknown>),
+    ...(overrides === undefined ? {} : { projectSettingsOverrides: migratedOverrides }),
+  };
+};
+const migrateSavedAutoSettleEntry = (entry: unknown): unknown => {
+  if (typeof entry !== "object" || entry === null || Array.isArray(entry)) return entry;
+  const record = entry as Record<string, unknown>;
+  const days = record.sidebarAutoSettleAfterDays;
+  if (days === null && !("sidebarAutoSettleAfterHours" in record)) {
+    return { ...record, sidebarAutoSettleAfterHours: null };
+  }
+  if (typeof days !== "number" || !Number.isFinite(days)) return record;
+  const hours =
+    typeof record.sidebarAutoSettleAfterHours === "number"
+      ? record.sidebarAutoSettleAfterHours
+      : Math.min(
+          MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+          Math.max(MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS, Math.round(days * 24)),
+        );
+  return {
+    ...record,
+    sidebarAutoSettleAfterHours: hours,
+    sidebarAutoSettleAfterDays: sidebarAutoSettleDaysForHours(hours),
+  };
+};
+/** Official clients write only days; carry that edit into hours. */
+export const sidebarAutoSettleHoursFromDays = (entry: {
+  readonly sidebarAutoSettleAfterDays?: SidebarAutoSettleAfterDays | null | undefined;
+  readonly sidebarAutoSettleAfterHours?: SidebarAutoSettleAfterHours | null | undefined;
+}): SidebarAutoSettleAfterHours | null | undefined =>
+  entry.sidebarAutoSettleAfterHours !== undefined || entry.sidebarAutoSettleAfterDays === undefined
+    ? entry.sidebarAutoSettleAfterHours
+    : entry.sidebarAutoSettleAfterDays === null
+      ? null
+      : Math.round(entry.sidebarAutoSettleAfterDays * 24);
 
 export const MAX_SNOOZE_PRESET_MINUTES = 30 * 24 * 60;
 export const MAX_SNOOZE_PRESETS = 8;
@@ -1052,6 +1123,7 @@ export const PROJECT_SCOPED_SERVER_SETTING_KEYS = [
   "pullRequestMergeMethod",
   "sidebarAutoSettleOnMerge",
   "sidebarAutoSettleAfterDays",
+  "sidebarAutoSettleAfterHours",
   "sidebarAutoSettleKeepPullRequests",
   "continueThreadsAfterServerUpdate",
   "responseStreamingMode",
@@ -1089,6 +1161,7 @@ export const ProjectSettingsOverrides = Schema.Struct({
   pullRequestMergeMethod: Schema.optionalKey(Schema.NullOr(PullRequestMergeMethod)),
   sidebarAutoSettleOnMerge: Schema.optionalKey(Schema.Boolean),
   sidebarAutoSettleAfterDays: Schema.optionalKey(Schema.NullOr(SidebarAutoSettleAfterDays)),
+  sidebarAutoSettleAfterHours: Schema.optionalKey(Schema.NullOr(SidebarAutoSettleAfterHours)),
   sidebarAutoSettleKeepPullRequests: Schema.optionalKey(Schema.Boolean),
   continueThreadsAfterServerUpdate: Schema.optionalKey(Schema.Boolean),
   responseStreamingMode: Schema.optionalKey(ResponseStreamingMode),
@@ -1122,6 +1195,7 @@ const NULLABLE_PROJECT_SETTINGS_OVERRIDES: ReadonlySet<ProjectScopedServerSettin
   "reviewGuideModelSelection",
   "pullRequestMergeMethod",
   "sidebarAutoSettleAfterDays",
+  "sidebarAutoSettleAfterHours",
 ]);
 
 /** Reclaimable bytes from which the offline `t3 doctor` repair is worth suggesting. */
@@ -1252,6 +1326,9 @@ export const ServerSettings = Schema.Struct({
   simlockDeviceHostsEnabled: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
   sidebarAutoSettleAfterDays: Schema.NullOr(SidebarAutoSettleAfterDays).pipe(
     Schema.withDecodingDefault(Effect.succeed(DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_DAYS)),
+  ),
+  sidebarAutoSettleAfterHours: Schema.NullOr(SidebarAutoSettleAfterHours).pipe(
+    Schema.withDecodingDefault(Effect.succeed(DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS)),
   ),
   compactIdleThreads: LegacyCompactIdleThreads.pipe(
     Schema.withDecodingDefault(Effect.succeed(false)),
@@ -1651,6 +1728,7 @@ export const ServerSettingsPatch = Schema.Struct({
   simlockDeviceHosts: Schema.optionalKey(SimlockDeviceHostConfigs),
   simlockDeviceHostsEnabled: Schema.optionalKey(Schema.Boolean),
   sidebarAutoSettleAfterDays: Schema.optionalKey(Schema.NullOr(SidebarAutoSettleAfterDays)),
+  sidebarAutoSettleAfterHours: Schema.optionalKey(Schema.NullOr(SidebarAutoSettleAfterHours)),
   compactIdleThreads: Schema.optionalKey(LegacyCompactIdleThreads),
   idleCompaction: Schema.optionalKey(IdleCompactionMode),
   sidebarAutoSettleKeepPullRequests: Schema.optionalKey(Schema.Boolean),

@@ -20,6 +20,7 @@ import {
   type ServerProvider,
   ServerSettings,
   type ServerSettingsPatch,
+  sidebarAutoSettleHoursFromDays,
   withIdleCompaction,
 } from "@t3tools/contracts";
 import * as Option from "effect/Option";
@@ -365,11 +366,35 @@ function patchedIdleCompaction(
   return globalIdleCompaction(current) === "off" ? "off" : "onReturn";
 }
 
+function withAutoSettleHours(patch: ServerSettingsPatch): ServerSettingsPatch {
+  const hours = sidebarAutoSettleHoursFromDays(patch);
+  const overrides = patch.projectSettingsOverrides;
+  const entries =
+    overrides === undefined
+      ? undefined
+      : Object.fromEntries(
+          Object.entries(overrides).map(([projectId, entry]) => {
+            const entryHours = entry === null ? undefined : sidebarAutoSettleHoursFromDays(entry);
+            return [
+              projectId,
+              entry === null || entryHours === undefined
+                ? entry
+                : { ...entry, sidebarAutoSettleAfterHours: entryHours },
+            ];
+          }),
+        );
+  return {
+    ...patch,
+    ...(hours !== undefined ? { sidebarAutoSettleAfterHours: hours } : {}),
+    ...(entries !== undefined ? { projectSettingsOverrides: entries } : {}),
+  };
+}
+
 export function applyServerSettingsPatch(
   current: ServerSettings,
   rawPatch: ServerSettingsPatch,
 ): ServerSettings {
-  const patch = translateLegacyProjectOverridePatch(current, rawPatch);
+  const patch = withAutoSettleHours(translateLegacyProjectOverridePatch(current, rawPatch));
   const selectionPatch = patch.textGenerationModelSelection;
   const {
     migrateModelPreferences,

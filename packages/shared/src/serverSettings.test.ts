@@ -93,6 +93,15 @@ describe("serverSettings helpers", () => {
     expect([on.idleCompaction, on.compactIdleThreads]).toEqual(["beforeCacheExpires", true]);
   });
 
+  it("carries an official client's auto-settle days into the hours this fork reads", () => {
+    const week = applyServerSettingsPatch(DEFAULT_SERVER_SETTINGS, {
+      sidebarAutoSettleAfterDays: 7,
+    });
+    expect(week.sidebarAutoSettleAfterHours).toBe(168);
+    const off = applyServerSettingsPatch(week, { sidebarAutoSettleAfterDays: null });
+    expect(off.sidebarAutoSettleAfterHours).toBeNull();
+  });
+
   it("changes a cleanup rule without replacing the machine's other rules", () => {
     const enabled = applyServerSettingsPatch(DEFAULT_SERVER_SETTINGS, {
       storageCleanup: { worktreeAfterDays: 8, worktreeOnMerge: true, logsAfterDays: 30 },

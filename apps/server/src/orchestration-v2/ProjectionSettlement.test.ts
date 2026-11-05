@@ -266,7 +266,7 @@ it.effect(
         const settings = {
           pullRequest: null,
           nowMs: DateTime.toEpochMillis(now),
-          autoSettleAfterDays: 7,
+          autoSettleAfterHours: 168,
           autoSettleOnMerge: false,
         };
         assert.deepEqual(

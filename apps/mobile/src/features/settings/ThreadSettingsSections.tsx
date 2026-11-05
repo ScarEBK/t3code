@@ -14,8 +14,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   DEFAULT_SERVER_SETTINGS,
-  sidebarAutoSettleDaysToHours,
-  sidebarAutoSettleHoursToDays,
+  DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+  sidebarAutoSettlePatch,
 } from "@t3tools/contracts";
 import { supportsSharedSettingsSync } from "@t3tools/client-runtime/state/shared-settings";
 import { AppText as Text } from "../../components/ui/AppText";
@@ -53,8 +53,8 @@ export function SettingsLabsRouteScreen() {
   );
 }
 
-const AUTO_SETTLE_DEFAULT_DAYS =
-  DEFAULT_SERVER_SETTINGS.sidebarAutoSettleAfterDays ?? sidebarAutoSettleHoursToDays(4);
+const AUTO_SETTLE_DEFAULT_HOURS =
+  DEFAULT_SERVER_SETTINGS.sidebarAutoSettleAfterHours ?? DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS;
 
 /**
  * Usage-limit and auto-settle rows. The Threads page owns their writes, so they share its queue
@@ -113,7 +113,7 @@ export function AutoSettleSettingsRows(props: {
   const disabled = !canWriteSettings || props.pending;
   const disabledFor = (...keys: string[]) =>
     disabled || managedSettingReason(displayTargets, ...keys) !== undefined;
-  const afterDays = referenceSettings.sidebarAutoSettleAfterDays;
+  const afterHours = referenceSettings.sidebarAutoSettleAfterHours;
 
   return (
     <View className="gap-6">
@@ -148,22 +148,20 @@ export function AutoSettleSettingsRows(props: {
         <SettingsSwitchRow
           icon="clock"
           label="Auto-settle inactive threads"
-          value={afterDays !== null}
-          disabled={disabledFor("sidebarAutoSettleAfterDays")}
+          value={afterHours !== null}
+          disabled={disabledFor("sidebarAutoSettleAfterHours")}
           onValueChange={(value) =>
-            writeToAll({ sidebarAutoSettleAfterDays: value ? AUTO_SETTLE_DEFAULT_DAYS : null })
+            writeToAll(sidebarAutoSettlePatch(value ? AUTO_SETTLE_DEFAULT_HOURS : null))
           }
         />
-        {afterDays !== null ? (
+        {afterHours !== null ? (
           <View className="flex-row items-center gap-4 px-4 py-4 android:min-h-14 android:py-3">
             <View className="w-[22px] android:w-6" />
             <Text className="flex-1 text-foreground text-lg android:text-base">Inactive hours</Text>
             <AutoSettleHoursField
-              value={sidebarAutoSettleDaysToHours(afterDays)}
-              disabled={disabledFor("sidebarAutoSettleAfterDays")}
-              onValueChange={(hours) =>
-                writeToAll({ sidebarAutoSettleAfterDays: sidebarAutoSettleHoursToDays(hours) })
-              }
+              value={afterHours}
+              disabled={disabledFor("sidebarAutoSettleAfterHours")}
+              onValueChange={(hours) => writeToAll(sidebarAutoSettlePatch(hours))}
             />
           </View>
         ) : null}
@@ -178,7 +176,7 @@ export function AutoSettleSettingsRows(props: {
             <Button
               label="Apply auto-settle defaults"
               tone="secondary"
-              disabled={disabledFor("sidebarAutoSettleOnMerge", "sidebarAutoSettleAfterDays")}
+              disabled={disabledFor("sidebarAutoSettleOnMerge", "sidebarAutoSettleAfterHours")}
               onPress={() => writeToAll(autoSettlePatch)}
             />
           </View>
