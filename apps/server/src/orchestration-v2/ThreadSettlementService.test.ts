@@ -213,7 +213,7 @@ describe("resolveAutoSettlementAt", () => {
       }),
       pullRequest: null,
       nowMs: NOW_MS,
-      autoSettleAfterDays: 3,
+      autoSettleAfterHours: 72,
       autoSettleOnMerge: true,
       autoSettleKeepPullRequests: true,
     };
@@ -240,7 +240,7 @@ describe("resolveAutoSettlementAt", () => {
       }),
       pullRequest: null,
       nowMs: NOW_MS,
-      autoSettleAfterDays: 3,
+      autoSettleAfterHours: 72,
       autoSettleOnMerge: true,
       autoSettleKeepPullRequests: false,
     };
@@ -256,7 +256,7 @@ describe("resolveAutoSettlementAt", () => {
       ThreadSettlementService.resolveAutoSettlementAt({
         ...input,
         pullRequest: { state: "merged", mergedAt: DateTime.formatIso(at(-1)) },
-        autoSettleAfterDays: null,
+        autoSettleAfterHours: null,
       }),
     ).toBeNull();
   });
@@ -270,7 +270,7 @@ describe("resolveAutoSettlementAt", () => {
         }),
         pullRequest: null,
         nowMs: NOW_MS,
-        autoSettleAfterDays: 3,
+        autoSettleAfterHours: 72,
         autoSettleOnMerge: true,
         autoSettleKeepPullRequests: false,
       }),
@@ -288,17 +288,17 @@ describe("resolveAutoSettlementAt", () => {
       thread: idle,
       pullRequest: null,
       nowMs: NOW_MS,
-      autoSettleAfterDays: 2,
+      autoSettleAfterHours: 48,
       autoSettleOnMerge: true,
     };
     expect(ThreadSettlementService.resolveAutoSettlementAt(input)).toEqual(at(-3 * DAY_MS));
     expect(
-      ThreadSettlementService.resolveAutoSettlementAt({ ...input, autoSettleAfterDays: 5 }),
+      ThreadSettlementService.resolveAutoSettlementAt({ ...input, autoSettleAfterHours: 120 }),
     ).toBeNull();
     expect(
-      ThreadSettlementService.resolveAutoSettlementAt({ ...input, autoSettleAfterDays: null }),
+      ThreadSettlementService.resolveAutoSettlementAt({ ...input, autoSettleAfterHours: null }),
     ).toBeNull();
-    const fourHours = { ...input, autoSettleAfterDays: 4 / 24 };
+    const fourHours = { ...input, autoSettleAfterHours: 4 };
     const idleFor = (ms: number) => shell({ latestRunCompletedAt: at(-ms) });
     expect(
       ThreadSettlementService.resolveAutoSettlementAt({
@@ -319,7 +319,7 @@ describe("resolveAutoSettlementAt", () => {
       thread: shell({ createdAt: at(-3 * DAY_MS) }),
       pullRequest: null,
       nowMs: NOW_MS,
-      autoSettleAfterDays: 2,
+      autoSettleAfterHours: 48,
       autoSettleOnMerge: false,
     };
     expect(ThreadSettlementService.resolveAutoSettlementAt(input)).toEqual(at(-3 * DAY_MS));
@@ -348,7 +348,7 @@ describe("resolveAutoSettlementAt", () => {
       thread,
       pullRequest: null,
       nowMs: NOW_MS,
-      autoSettleAfterDays: 1,
+      autoSettleAfterHours: 24,
       autoSettleOnMerge: false,
     };
     expect(ThreadSettlementService.resolveAutoSettlementAt(input)).toBeNull();
@@ -369,7 +369,7 @@ describe("resolveAutoSettlementAt", () => {
         mergedAt: DateTime.formatIso(at(-60 * 60 * 1_000)),
       },
       nowMs: NOW_MS,
-      autoSettleAfterDays: null,
+      autoSettleAfterHours: null,
       autoSettleOnMerge: true,
     };
     expect(ThreadSettlementService.resolveAutoSettlementAt(input)).toEqual(at(-90 * 60 * 1_000));
@@ -403,7 +403,7 @@ describe("resolveAutoSettlementAt", () => {
       thread: woken,
       pullRequest: { state: "merged" as const, mergedAt: DateTime.formatIso(at(-60 * 60 * 1_000)) },
       nowMs: NOW_MS,
-      autoSettleAfterDays: null,
+      autoSettleAfterHours: null,
       autoSettleOnMerge: true,
     };
     expect(ThreadSettlementService.resolveAutoSettlementAt(input)).toEqual(at(-29 * 60 * 1_000));
@@ -444,7 +444,7 @@ describe("resolveAutoSettlementAt", () => {
       }),
       pullRequest: null,
       nowMs: NOW_MS,
-      autoSettleAfterDays: null,
+      autoSettleAfterHours: null,
       autoSettleOnMerge: true,
     };
     expect(ThreadSettlementService.resolveAutoSettlementAt(input)).toBeNull();
@@ -472,7 +472,7 @@ describe("autoSettlementSettingsKey", () => {
     const never = ThreadSettlementService.autoSettlementSettingsKey({
       ...DEFAULT_SERVER_SETTINGS,
       projectSettingsOverrides: {
-        [PROJECT_ID]: { sidebarAutoSettleOnMerge: true, sidebarAutoSettleAfterDays: null },
+        [PROJECT_ID]: { sidebarAutoSettleOnMerge: true, sidebarAutoSettleAfterHours: null },
       },
     });
     assert.notStrictEqual(inherits, never);
@@ -585,7 +585,7 @@ const makeHarness = Effect.fn("makeThreadSettlementHarness")(function* (options:
   const snapshotReads = yield* Queue.unbounded<number>();
   const candidateReads = yield* Ref.make<ReadonlyArray<string | undefined>>([]);
   const settings = yield* Ref.make(
-    options.settings ?? { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterDays: 3 },
+    options.settings ?? { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterHours: 72 },
   );
   const settingsReadCount = yield* Ref.make(0);
   const settingsChanges = yield* PubSub.unbounded<ContractServerSettings>();
@@ -789,7 +789,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
         );
         const fixture = yield* makeHarness({
           snapshot: makeSnapshot(threads),
-          settings: { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterDays: 3 },
+          settings: { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterHours: 72 },
         });
         yield* Effect.gen(function* () {
           const service = yield* ThreadSettlementService.ThreadSettlementServiceV2;
@@ -797,7 +797,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
           assert.deepEqual(yield* Ref.get(fixture.commands), []);
           assert.deepEqual(yield* Ref.get(fixture.branchCalls), []);
           assert.equal(yield* Ref.get(fixture.settingsReadCount), 2);
-          yield* fixture.updateSettings({ sidebarAutoSettleAfterDays: 1 });
+          yield* fixture.updateSettings({ sidebarAutoSettleAfterHours: 24 });
           yield* Queue.take(fixture.snapshotReads);
           yield* service.drain;
           assert.deepEqual(
@@ -837,7 +837,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
         });
         const fixture = yield* makeHarness({
           snapshot: makeSnapshot([thread]),
-          settings: { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterDays: null },
+          settings: { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterHours: null },
         });
 
         yield* Effect.gen(function* () {
@@ -862,7 +862,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
           snapshot: makeSnapshot([thread]),
           settings: {
             ...DEFAULT_SERVER_SETTINGS,
-            sidebarAutoSettleAfterDays: 3,
+            sidebarAutoSettleAfterHours: 72,
             sidebarAutoSettleKeepPullRequests: false,
           },
         });
@@ -889,9 +889,9 @@ describe("ThreadSettlementServiceV2 worker", () => {
           snapshot: makeSnapshot([thread, other]),
           settings: {
             ...DEFAULT_SERVER_SETTINGS,
-            sidebarAutoSettleAfterDays: null,
+            sidebarAutoSettleAfterHours: null,
             sidebarAutoSettleOnMerge: false,
-            projectSettingsOverrides: { [PROJECT_ID]: { sidebarAutoSettleAfterDays: 2 } },
+            projectSettingsOverrides: { [PROJECT_ID]: { sidebarAutoSettleAfterHours: 48 } },
           },
         });
         yield* Effect.gen(function* () {
@@ -913,7 +913,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
         let disable: Effect.Effect<unknown> = Effect.void;
         const fixture = yield* makeHarness({
           snapshot: makeSnapshot(threads),
-          settings: { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterDays: 3 },
+          settings: { ...DEFAULT_SERVER_SETTINGS, sidebarAutoSettleAfterHours: 72 },
           onDispatch: () => disable,
         });
         disable = fixture.updateSettings({ sidebarAutoSettleAfterDays: null });
@@ -1079,7 +1079,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
         yield* Effect.gen(function* () {
           const reactor = yield* ThreadSettlementService.ThreadSettlementServiceV2;
           yield* startHarness(reactor, fixture.activation, fixture.snapshotReads);
-          yield* fixture.updateSettings({ sidebarAutoSettleAfterDays: 4 });
+          yield* fixture.updateSettings({ sidebarAutoSettleAfterHours: 96 });
           yield* Deferred.await(periodicLookupStarted);
 
           yield* fixture.publishMerge;
@@ -1145,7 +1145,7 @@ describe("ThreadSettlementServiceV2 worker", () => {
           const reactor = yield* ThreadSettlementService.ThreadSettlementServiceV2;
           yield* startHarness(reactor, fixture.activation, fixture.snapshotReads);
           assert.deepStrictEqual(yield* Ref.get(fixture.commands), []);
-          yield* fixture.updateSettings({ sidebarAutoSettleAfterDays: 4 });
+          yield* fixture.updateSettings({ sidebarAutoSettleAfterHours: 96 });
           yield* Deferred.await(periodicLookupStarted);
 
           yield* Ref.set(
@@ -1619,7 +1619,7 @@ describe("isSnoozed", () => {
         thread,
         pullRequest: { state: "merged", mergedAt: DateTime.formatIso(at(-1)) },
         nowMs: NOW_MS,
-        autoSettleAfterDays: null,
+        autoSettleAfterHours: null,
         autoSettleOnMerge: true,
       }),
     ).toBeNull();

@@ -67,11 +67,14 @@ Fork settings (mic on/off, speech helper address, usage meter on/off, split stat
 
 ## Auto-settle after 4 hours
 
-Idle threads settle after four hours by default, and the setting is edited in hours. Upstream's
-schema rejects anything under one day and then ignores all of `settings.json`, so before reinstalling
-the official app, remove any saved `sidebarAutoSettleAfterDays` below 1 from that file. The default
-is not saved there. Changed files: `packages/contracts/src/settings.ts`, the auto-settle controls in
-`SettingsPanels.tsx`, `SettingInheritance.tsx`, `settingsSearch.ts`, and the mobile auto-settle field.
+Idle threads settle after four hours by default, and the setting is edited in hours. The fork keeps
+the hours in its own `sidebarAutoSettleAfterHours` field and still sends upstream's
+`sidebarAutoSettleAfterDays` in its 1-90 range (rounded, at least 1). Official clients, like the
+App Store phone app, reject the whole settings payload when that day count is out of range, and then
+cannot connect. When an official client changes only the days, the server carries that into hours.
+Changed files: `packages/contracts/src/settings.ts`, `packages/shared/src/serverSettings.ts`,
+`ThreadSettlementService.ts`, the auto-settle controls in `SettingsPanels.tsx`,
+`SettingInheritance.tsx`, and the mobile auto-settle settings.
 
 ## Windows installer
 

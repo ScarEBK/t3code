@@ -177,7 +177,7 @@ it.effect.each(["provider", "mcp"] as const)(
         thread: candidates[0]!,
         pullRequest: null,
         nowMs: DateTime.toEpochMillis(DateTime.add(childCreatedAt, { days: 4 })),
-        autoSettleAfterDays: 3,
+        autoSettleAfterHours: 72,
         autoSettleOnMerge: false,
       });
       assert.equal(settledAt && DateTime.formatIso(settledAt), DateTime.formatIso(childCreatedAt));

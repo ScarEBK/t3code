@@ -21,8 +21,8 @@ import {
   MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
   type ResponseStreamingMode,
   type QuitConfirmationMode,
-  sidebarAutoSettleDaysToHours,
-  sidebarAutoSettleHoursToDays,
+  DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+  sidebarAutoSettlePatch,
   SidebarProjectSortOrder,
 } from "@t3tools/contracts/settings";
 import { desktopUpdateChannelOf } from "@t3tools/shared/cliRelease";
@@ -486,7 +486,8 @@ export function useSettingsRestore(onRestored?: () => void) {
     ...(settings.sidebarWorkingShelfEnabled !== DEFAULT_UNIFIED_SETTINGS.sidebarWorkingShelfEnabled
       ? ["Working section"]
       : []),
-    ...(settings.sidebarAutoSettleAfterDays !== DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays
+    ...(settings.sidebarAutoSettleAfterHours !==
+    DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterHours
       ? ["Auto-settle inactive threads"]
       : []),
     ...(settings.sidebarAutoSettleKeepPullRequests !==
@@ -652,7 +653,7 @@ export function useSettingsRestore(onRestored?: () => void) {
       sidebarProjectGroupingMode: DEFAULT_UNIFIED_SETTINGS.sidebarProjectGroupingMode,
       sidebarProjectSortOrder: DEFAULT_UNIFIED_SETTINGS.sidebarProjectSortOrder,
       sidebarWorkingShelfEnabled: DEFAULT_UNIFIED_SETTINGS.sidebarWorkingShelfEnabled,
-      sidebarAutoSettleAfterDays: DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays,
+      ...sidebarAutoSettlePatch(DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterHours),
       sidebarAutoSettleKeepPullRequests: DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleKeepPullRequests,
       sidebarAutoSettleOnMerge: DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleOnMerge,
       autoResumeLimitedThreads: DEFAULT_UNIFIED_SETTINGS.autoResumeLimitedThreads,
@@ -704,8 +705,10 @@ export function useSettingsRestore(onRestored?: () => void) {
   };
 }
 
-const AUTO_SETTLE_DEFAULT_DAYS =
-  DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays ?? sidebarAutoSettleHoursToDays(4);
+const AUTO_SETTLE_DEFAULT_HOURS =
+  DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterHours ?? DEFAULT_SIDEBAR_AUTO_SETTLE_AFTER_HOURS;
+
+const AUTO_SETTLE_KEYS = ["sidebarAutoSettleAfterHours", "sidebarAutoSettleAfterDays"] as const;
 
 function AutoSettleHoursInput({
   value,
@@ -1669,55 +1672,48 @@ export function ThreadsSettingsPanel() {
 
           <SettingsRow
             serverScoped
-            settingKeys={["sidebarAutoSettleAfterDays"]}
+            settingKeys={AUTO_SETTLE_KEYS}
             {...searchableSetting("auto-settle-inactive-threads")}
             description="Sidebar threads with no activity for this long settle automatically."
             resetAction={
-              settings.sidebarAutoSettleAfterDays !==
-              DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays ? (
+              settings.sidebarAutoSettleAfterHours !==
+              DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterHours ? (
                 <SettingResetButton
                   label="auto-settle"
                   onClick={() =>
-                    updateSettings({
-                      sidebarAutoSettleAfterDays:
-                        DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterDays,
-                    })
+                    updateSettings(
+                      sidebarAutoSettlePatch(DEFAULT_UNIFIED_SETTINGS.sidebarAutoSettleAfterHours),
+                    )
                   }
                 />
               ) : null
             }
             control={
               <ScopedSwitch
-                settingKeys={["sidebarAutoSettleAfterDays"]}
-                checked={settings.sidebarAutoSettleAfterDays !== null}
+                settingKeys={AUTO_SETTLE_KEYS}
+                checked={settings.sidebarAutoSettleAfterHours !== null}
                 onCheckedChange={(checked) =>
-                  updateSettings({
-                    sidebarAutoSettleAfterDays: checked ? AUTO_SETTLE_DEFAULT_DAYS : null,
-                  })
+                  updateSettings(sidebarAutoSettlePatch(checked ? AUTO_SETTLE_DEFAULT_HOURS : null))
                 }
                 aria-label="Auto-settle inactive threads"
               />
             }
           />
-          {settings.sidebarAutoSettleAfterDays !== null ? (
+          {settings.sidebarAutoSettleAfterHours !== null ? (
             <SettingsRow
               serverScoped
-              settingKeys={["sidebarAutoSettleAfterDays"]}
+              settingKeys={AUTO_SETTLE_KEYS}
               title={searchableSetting("days-before-auto-settle").title}
               description="Any new activity un-settles a thread automatically."
               control={
                 <AutoSettleHoursInput
-                  value={sidebarAutoSettleDaysToHours(settings.sidebarAutoSettleAfterDays)}
-                  onCommit={(hours) =>
-                    updateSettings({
-                      sidebarAutoSettleAfterDays: sidebarAutoSettleHoursToDays(hours),
-                    })
-                  }
+                  value={settings.sidebarAutoSettleAfterHours}
+                  onCommit={(hours) => updateSettings(sidebarAutoSettlePatch(hours))}
                 />
               }
             />
           ) : null}
-          {settings.sidebarAutoSettleAfterDays !== null && supportsAutoSettlementScope ? (
+          {settings.sidebarAutoSettleAfterHours !== null && supportsAutoSettlementScope ? (
             <SettingsRow
               serverScoped
               settingKeys={["sidebarAutoSettleKeepPullRequests"]}

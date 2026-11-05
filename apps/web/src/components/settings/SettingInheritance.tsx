@@ -4,7 +4,6 @@ import {
   type ProjectFileBackedSettingKey,
   resolveEnvironmentMachineKind,
   type ServerSettings,
-  sidebarAutoSettleDaysToHours,
   type WorktreeSubmodules,
 } from "@t3tools/contracts";
 import { CheckIcon, ChevronRightIcon, LayersIcon } from "lucide-react";
@@ -49,7 +48,7 @@ function formatValue(key: keyof ServerSettings, value: unknown): string {
   if (value === null || value === undefined) {
     return key === "pullRequestMergeMethod"
       ? "Last selected"
-      : key === "sidebarAutoSettleAfterDays"
+      : key === "sidebarAutoSettleAfterHours" || key === "sidebarAutoSettleAfterDays"
         ? "Never"
         : key === "defaultModelSelection"
           ? "Automatic"
@@ -63,9 +62,9 @@ function formatValue(key: keyof ServerSettings, value: unknown): string {
   }
   if (typeof value === "boolean") return value ? "On" : "Off";
   if (typeof value === "number") {
-    if (key !== "sidebarAutoSettleAfterDays") return String(value);
-    const hours = sidebarAutoSettleDaysToHours(value);
-    return `${hours} ${hours === 1 ? "hour" : "hours"}`;
+    if (key === "sidebarAutoSettleAfterDays") return `${value} ${value === 1 ? "day" : "days"}`;
+    if (key !== "sidebarAutoSettleAfterHours") return String(value);
+    return `${value} ${value === 1 ? "hour" : "hours"}`;
   }
   if (typeof value === "string") {
     if (key === "defaultThreadEnvMode" && (value === "local" || value === "worktree")) {
