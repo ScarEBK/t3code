@@ -59,6 +59,7 @@ import { useNewThreadHandler } from "~/hooks/useHandleNewThread";
 import { cn } from "~/lib/utils";
 import { useRightPanelStore } from "~/rightPanelStore";
 import { useProjects } from "~/state/entities";
+import { usePrimaryEnvironmentId } from "~/state/environments";
 import fiveHubLogo from "./5hub-logo.png";
 import motionLifeLogo from "./motion-life-logo.png";
 import { loadBoard, setCardStatus } from "./boardClient";
@@ -234,7 +235,9 @@ export function ChecklistPanel(props: {
   readonly visible: boolean;
   readonly currentProjectId?: ProjectId | null;
 }) {
-  const { environmentId, visible } = props;
+  const { visible } = props;
+  // The board lives beside this app's own server, not on the machine a thread runs on.
+  const environmentId = usePrimaryEnvironmentId() ?? props.environmentId;
   const currentProjectId = props.currentProjectId ?? null;
   const [snapshot, setSnapshot] = useState<BoardSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
