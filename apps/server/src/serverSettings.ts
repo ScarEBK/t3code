@@ -19,6 +19,7 @@ import {
   type ManagedPolicySummary,
   globalIdleCompaction,
   isSecretReference,
+  migrateSavedAutoSettle,
   type SecretReference,
   withIdleCompaction,
 } from "@t3tools/contracts";
@@ -793,7 +794,9 @@ const make = Effect.gen(function* () {
       const parsed = decodeSettingsFileJsonExit(raw);
       const decoded = Exit.isFailure(parsed)
         ? parsed
-        : decodePersistedServerSettingsExit(managed.withDefaults(parsed.value));
+        : decodePersistedServerSettingsExit(
+            managed.withDefaults(migrateSavedAutoSettle(parsed.value)),
+          );
       const legacySettings = decodeLegacyProviderSettingsJsonExit(raw);
       if (legacySettings._tag === "Success") {
         legacyProviders = legacySettings.value.providers;

@@ -21,6 +21,7 @@ import {
   resolveProviderInstanceEnabled,
   ServerSettings,
   ServerSettingsPatch,
+  migrateSavedAutoSettle,
   sidebarAutoSettlePatch,
   withIdleCompaction,
 } from "./settings.ts";
@@ -362,6 +363,22 @@ describe("ServerSettings auto-settle window", () => {
       expect(decodeServerSettingsPatch(patch)).toEqual(patch);
     }
     expect(() => decodeServerSettingsPatch({ sidebarAutoSettleAfterHours: 0.5 })).toThrow();
+  });
+
+  it("keeps saved day values, Never, and older part-day saves when loading", () => {
+    const load = (raw: unknown) => decodeServerSettings(migrateSavedAutoSettle(raw));
+    const never = load({ sidebarAutoSettleAfterDays: null });
+    expect(never.sidebarAutoSettleAfterHours).toBeNull();
+    expect(load({ sidebarAutoSettleAfterDays: 7 }).sidebarAutoSettleAfterHours).toBe(168);
+    const partDay = load({
+      sidebarAutoSettleAfterDays: 8 / 24,
+      projectSettingsOverrides: { one: { sidebarAutoSettleAfterDays: null } },
+    });
+    expect(partDay.sidebarAutoSettleAfterHours).toBe(8);
+    expect(partDay.sidebarAutoSettleAfterDays).toBe(1);
+    expect(
+      Object.values(partDay.projectSettingsOverrides)[0]?.sidebarAutoSettleAfterHours,
+    ).toBeNull();
   });
 });
 

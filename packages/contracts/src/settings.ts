@@ -109,6 +109,46 @@ export const sidebarAutoSettlePatch = (hours: SidebarAutoSettleAfterHours | null
   sidebarAutoSettleAfterHours: hours,
   sidebarAutoSettleAfterDays: hours === null ? null : sidebarAutoSettleDaysForHours(hours),
 });
+/** Saved settings may hold only days, or the part-day values older fork builds wrote there. */
+export const migrateSavedAutoSettle = (raw: unknown): unknown => {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return raw;
+  const record = raw as Record<string, unknown>;
+  const overrides = record.projectSettingsOverrides;
+  const migratedOverrides =
+    typeof overrides === "object" && overrides !== null && !Array.isArray(overrides)
+      ? Object.fromEntries(
+          Object.entries(overrides).map(([projectId, entry]) => [
+            projectId,
+            migrateSavedAutoSettleEntry(entry),
+          ]),
+        )
+      : overrides;
+  return {
+    ...(migrateSavedAutoSettleEntry(record) as Record<string, unknown>),
+    ...(overrides === undefined ? {} : { projectSettingsOverrides: migratedOverrides }),
+  };
+};
+const migrateSavedAutoSettleEntry = (entry: unknown): unknown => {
+  if (typeof entry !== "object" || entry === null || Array.isArray(entry)) return entry;
+  const record = entry as Record<string, unknown>;
+  const days = record.sidebarAutoSettleAfterDays;
+  if (days === null && !("sidebarAutoSettleAfterHours" in record)) {
+    return { ...record, sidebarAutoSettleAfterHours: null };
+  }
+  if (typeof days !== "number" || !Number.isFinite(days)) return record;
+  const hours =
+    typeof record.sidebarAutoSettleAfterHours === "number"
+      ? record.sidebarAutoSettleAfterHours
+      : Math.min(
+          MAX_SIDEBAR_AUTO_SETTLE_AFTER_HOURS,
+          Math.max(MIN_SIDEBAR_AUTO_SETTLE_AFTER_HOURS, Math.round(days * 24)),
+        );
+  return {
+    ...record,
+    sidebarAutoSettleAfterHours: hours,
+    sidebarAutoSettleAfterDays: sidebarAutoSettleDaysForHours(hours),
+  };
+};
 /** Official clients write only days; carry that edit into hours. */
 export const sidebarAutoSettleHoursFromDays = (entry: {
   readonly sidebarAutoSettleAfterDays?: SidebarAutoSettleAfterDays | null | undefined;
