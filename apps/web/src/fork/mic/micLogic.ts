@@ -1,22 +1,4 @@
-export const DEFAULT_MIC_ENDPOINT = "http://127.0.0.1:47811";
 export const MAX_RECORDING_MS = 10 * 60 * 1000;
-
-export function normalizeMicEndpoint(raw: string): string | null {
-  const trimmed = raw.trim();
-  if (trimmed.length === 0) return null;
-  let url: URL;
-  try {
-    url = new URL(trimmed);
-  } catch {
-    return null;
-  }
-  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-  return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
-}
-
-export function resolveMicEndpoint(raw: string): string {
-  return normalizeMicEndpoint(raw) ?? DEFAULT_MIC_ENDPOINT;
-}
 
 export function formatRecordingDuration(elapsedMs: number): string {
   const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
@@ -48,9 +30,15 @@ export function levelFromSamples(samples: ArrayLike<number>): number {
   return Math.min(1, rms * 4);
 }
 
+/** Keeps the rewrite's line breaks (its numbered list) but tidies stray spaces. */
 export function transcriptToInsert(raw: unknown): string {
   if (typeof raw !== "string") return "";
-  return raw.replace(/\s+/g, " ").trim();
+  return raw
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export type MicStartFailure = "permission-denied" | "no-microphone" | "unsupported" | "unknown";

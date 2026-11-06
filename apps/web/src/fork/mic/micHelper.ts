@@ -1,10 +1,26 @@
 import { useSyncExternalStore } from "react";
+import {
+  type DeviceHubAccess,
+  resolveDeviceHubAccess,
+  withDeviceHubQuery,
+} from "@t3tools/client-runtime/state/deviceHubAccess";
+import type { EnvironmentId } from "@t3tools/contracts";
+import * as Effect from "effect/Effect";
+import * as Option from "effect/Option";
+import { Atom, AtomRegistry } from "effect/reactivity";
+
+import { connectionAtomRuntime } from "~/connection/runtime";
+import { appAtomRegistry } from "~/rpc/atomRegistry";
+import { environmentSession } from "~/state/session";
 import { transcriptToInsert } from "./micLogic";
+
+// The mic talks to the environment that owns the chat (PC chat -> PC, VPS chat -> VPS).
+// Must match MIC_ROUTE_PREFIX in apps/server/src/fork/MicProxy.ts.
+const MIC_BASE_PATH = "/api/fork/mic";
 
 export type MicHelperStatus = "unknown" | "online" | "offline";
 
-const HEALTH_TIMEOUT_MS = 1_500;
-const TRANSCRIBE_TIMEOUT_MS = 120_000;
+const TRANSCRIBE_TIMEOUT_MS = 300_000;
 const RECHECK_AFTER_MS = 15_000;
 
 interface HelperEntry {
@@ -13,29 +29,83 @@ interface HelperEntry {
   inflight: Promise<boolean> | null;
 }
 
-// One shared health record per endpoint, so every composer on screen asks once.
+// One shared health record per environment, so every composer on screen asks once.
 const entries = new Map<string, HelperEntry>();
 const listeners = new Set<() => void>();
 
-function entryFor(endpoint: string): HelperEntry {
-  let entry = entries.get(endpoint);
+function entryFor(environmentId: string): HelperEntry {
+  let entry = entries.get(environmentId);
   if (!entry) {
     entry = { status: "unknown", checkedAt: 0, inflight: null };
-    entries.set(endpoint, entry);
+    entries.set(environmentId, entry);
   }
   return entry;
 }
 
-function setStatus(endpoint: string, status: MicHelperStatus) {
-  const entry = entryFor(endpoint);
+function setStatus(environmentId: string, status: MicHelperStatus) {
+  const entry = entryFor(environmentId);
   entry.checkedAt = Date.now();
   if (entry.status === status) return;
   entry.status = status;
   for (const listener of listeners) listener();
 }
 
-export function checkMicHelper(endpoint: string, options?: { force?: boolean }): Promise<boolean> {
-  const entry = entryFor(endpoint);
+const micAccessAtom = Atom.family((environmentId: EnvironmentId) =>
+  connectionAtomRuntime
+    .atom((get) => {
+      const prepared = Option.getOrNull(
+        get(environmentSession.preparedConnectionValueAtom(environmentId)),
+      );
+      if (prepared === null) return Effect.never;
+      return resolveDeviceHubAccess({ prepared, hubBasePath: MIC_BASE_PATH });
+    })
+    .pipe(Atom.setIdleTTL(60_000), Atom.withLabel(`fork-mic-access:${environmentId}`)),
+);
+
+function readMicAccess(
+  environmentId: EnvironmentId,
+  refresh: boolean,
+): Promise<DeviceHubAccess | null> {
+  const atom = micAccessAtom(environmentId);
+  if (refresh) appAtomRegistry.refresh(atom);
+  return Effect.runPromise(
+    AtomRegistry.getResult(appAtomRegistry, atom, { suspendOnWaiting: true }).pipe(
+      Effect.timeout("10 seconds"),
+      Effect.orElseSucceed(() => null),
+    ),
+  );
+}
+
+async function micRequest(
+  environmentId: EnvironmentId,
+  path: string,
+  init: { method: "GET" | "POST"; body?: Blob; timeoutMs: number },
+): Promise<{ response: Response; body: unknown }> {
+  // A media ticket can expire between requests; one fresh ticket retries an auth failure.
+  for (const refresh of [false, true]) {
+    const access = await readMicAccess(environmentId, refresh);
+    if (!access) throw new MicTranscribeError("offline", "Can't reach this computer right now.");
+    const response = await fetch(withDeviceHubQuery(`${access.httpBase}${path}`, access), {
+      method: init.method,
+      cache: "no-store",
+      credentials: access.credentials ? "include" : "same-origin",
+      ...(init.body
+        ? { body: init.body, headers: { "Content-Type": init.body.type || "audio/webm" } }
+        : {}),
+      signal: AbortSignal.timeout(init.timeoutMs),
+    });
+    if (response.status === 401 && !refresh) continue;
+    const body: unknown = await response.json().catch(() => null);
+    return { response, body };
+  }
+  throw new MicTranscribeError("offline", "Can't reach this computer right now.");
+}
+
+export function checkMicHelper(
+  environmentId: EnvironmentId,
+  options?: { force?: boolean },
+): Promise<boolean> {
+  const entry = entryFor(environmentId);
   if (entry.inflight) return entry.inflight;
   if (
     !options?.force &&
@@ -44,16 +114,19 @@ export function checkMicHelper(endpoint: string, options?: { force?: boolean }):
   ) {
     return Promise.resolve(entry.status === "online");
   }
-  const request = fetch(`${endpoint}/health`, { signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS) })
-    .then(async (response) => {
-      if (!response.ok) return false;
-      const body: unknown = await response.json().catch(() => null);
-      return typeof body === "object" && body !== null && "ok" in body && body.ok === true;
-    })
+  const request = micRequest(environmentId, "/health", { method: "GET", timeoutMs: 5_000 })
+    .then(
+      ({ response, body }) =>
+        response.ok &&
+        typeof body === "object" &&
+        body !== null &&
+        "ok" in body &&
+        body.ok === true,
+    )
     .catch(() => false)
     .then((online) => {
       entry.inflight = null;
-      setStatus(endpoint, online ? "online" : "offline");
+      setStatus(environmentId, online ? "online" : "offline");
       return online;
     });
   entry.inflight = request;
@@ -67,10 +140,10 @@ function subscribe(listener: () => void) {
   };
 }
 
-export function useMicHelperStatus(endpoint: string): MicHelperStatus {
+export function useMicHelperStatus(environmentId: EnvironmentId): MicHelperStatus {
   return useSyncExternalStore(
     subscribe,
-    () => entryFor(endpoint).status,
+    () => entryFor(environmentId).status,
     () => "unknown" as const,
   );
 }
@@ -83,42 +156,67 @@ export class MicTranscribeError extends Error {
   }
 }
 
-export async function transcribeWithHelper(endpoint: string, audio: Blob): Promise<string> {
-  let response: Response;
+export interface MicResult {
+  /** What goes in the message box: the rewrite, or the exact words if the rewrite failed. */
+  readonly text: string;
+  readonly rewritten: boolean;
+  readonly warning: string | null;
+}
+
+export async function transcribeWithHelper(
+  target: {
+    readonly environmentId: EnvironmentId;
+    readonly threadId: string | null;
+    readonly projectId: string | null;
+  },
+  audio: Blob,
+): Promise<MicResult> {
+  const query = new URLSearchParams();
+  if (target.threadId) query.set("threadId", target.threadId);
+  if (target.projectId) query.set("projectId", target.projectId);
+  const suffix = query.size > 0 ? `?${query.toString()}` : "";
+  let result: { response: Response; body: unknown };
   try {
-    response = await fetch(`${endpoint}/transcribe`, {
+    result = await micRequest(target.environmentId, `/transcribe${suffix}`, {
       method: "POST",
-      headers: { "Content-Type": audio.type || "audio/webm" },
       body: audio,
-      signal: AbortSignal.timeout(TRANSCRIBE_TIMEOUT_MS),
+      timeoutMs: TRANSCRIBE_TIMEOUT_MS,
     });
   } catch (error) {
-    setStatus(endpoint, "offline");
+    if (error instanceof MicTranscribeError) throw error;
+    setStatus(target.environmentId, "offline");
     throw new MicTranscribeError(
       "offline",
       error instanceof Error && error.name === "TimeoutError"
-        ? "The speech helper took too long to answer."
-        : "Couldn't reach the speech helper.",
+        ? "Listening took too long."
+        : "Couldn't reach this computer.",
     );
   }
-  setStatus(endpoint, "online");
-  let body: unknown = null;
-  try {
-    body = await response.json();
-  } catch (error) {
-    // The timeout also covers reading the body; don't mistake it for an empty transcript.
-    if (error instanceof Error && error.name === "TimeoutError") {
-      throw new MicTranscribeError("offline", "The speech helper took too long to answer.");
-    }
+  const { response, body } = result;
+  const field = (name: string): unknown =>
+    typeof body === "object" && body !== null && name in body
+      ? (body as Record<string, unknown>)[name]
+      : undefined;
+  if (response.status === 503) {
+    setStatus(target.environmentId, "offline");
+    const error = field("error");
+    throw new MicTranscribeError(
+      "offline",
+      typeof error === "string" ? error : "Scar Mic isn't running.",
+    );
   }
+  setStatus(target.environmentId, "online");
   if (!response.ok) {
-    const detail =
-      typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
-        ? body.error
-        : `HTTP ${response.status}`;
-    throw new MicTranscribeError("failed", detail);
+    const error = field("error");
+    throw new MicTranscribeError(
+      "failed",
+      typeof error === "string" ? error : `HTTP ${response.status}`,
+    );
   }
-  return transcriptToInsert(
-    typeof body === "object" && body !== null && "text" in body ? body.text : undefined,
-  );
+  const warning = field("warning");
+  return {
+    text: transcriptToInsert(field("text")),
+    rewritten: field("rewritten") === true,
+    warning: typeof warning === "string" ? warning : null,
+  };
 }

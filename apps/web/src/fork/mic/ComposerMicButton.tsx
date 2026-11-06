@@ -1,4 +1,4 @@
-import type { ResolvedKeybindingsConfig } from "@t3tools/contracts";
+import type { EnvironmentId, ResolvedKeybindingsConfig } from "@t3tools/contracts";
 import { MicIcon } from "lucide-react";
 import { use, useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { BackgroundThreadContext } from "~/components/chat/backgroundThread";
@@ -10,7 +10,7 @@ import { useNowSecond } from "~/hooks/useNowSecond";
 import { useStableCallback } from "~/hooks/useStableCallback";
 import { shortcutLabelForCommand } from "~/keybindings";
 import { registerCommands } from "~/shortcuts/dispatcher";
-import { useMicEnabled, useMicEndpointSetting } from "../forkSettings";
+import { useMicEnabled } from "../forkSettings";
 import { SplitPaneRoleContext } from "../split/splitPaneRole";
 import {
   checkMicHelper,
@@ -18,35 +18,40 @@ import {
   transcribeWithHelper,
   useMicHelperStatus,
 } from "./micHelper";
-import {
-  classifyMicStartError,
-  formatRecordingDuration,
-  MAX_RECORDING_MS,
-  resolveMicEndpoint,
-} from "./micLogic";
+import { classifyMicStartError, formatRecordingDuration, MAX_RECORDING_MS } from "./micLogic";
 import { startMicRecording, type MicRecording } from "./micRecorder";
 
 const MIC_COMMAND = "composer.dictate";
 
 type MicPhase = "idle" | "starting" | "recording" | "transcribing";
 
+/** Where the words go: the chat environment hears and rewrites them. */
+export interface MicTarget {
+  readonly environmentId: EnvironmentId;
+  readonly threadId: string | null;
+  readonly projectId: string | null;
+}
+
 const LEVEL_BAR_WEIGHTS = [0.55, 1, 0.75, 0.45] as const;
 
 interface ComposerMicButtonProps {
   readonly keybindings: ResolvedKeybindingsConfig;
   readonly disabled: boolean;
-  /** Inserts at the composer's caret; false when the composer can't take text right now. */
+  readonly target: MicTarget;
+  /** Puts the rewritten message in the composer and sends it; false when it couldn't. */
   readonly onTranscript: (text: string) => boolean;
 }
 
-function helperHint(endpoint: string) {
-  return `Start Scar Mic (${endpoint.replace(/^https?:\/\//, "")}), then try again.`;
-}
+const HELPER_HINT = "Start Scar Mic on the computer this chat runs on, then try again.";
 
-export function ComposerMicButton({ keybindings, disabled, onTranscript }: ComposerMicButtonProps) {
+export function ComposerMicButton({
+  keybindings,
+  disabled,
+  target,
+  onTranscript,
+}: ComposerMicButtonProps) {
   const [micEnabled] = useMicEnabled();
-  const [endpointSetting] = useMicEndpointSetting();
-  const endpoint = resolveMicEndpoint(endpointSetting);
+  const endpoint = target.environmentId;
   const helperStatus = useMicHelperStatus(endpoint);
   const backgroundThread = use(BackgroundThreadContext);
   const splitRole = use(SplitPaneRoleContext);
@@ -95,7 +100,15 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
     setStartedAt(null);
     try {
       const audio = await recording.stop();
-      const text = await transcribeWithHelper(endpoint, audio);
+      const result = await transcribeWithHelper(target, audio);
+      const text = result.text;
+      if (result.warning) {
+        toastManager.add({
+          type: "warning",
+          title: "Sent your exact words.",
+          description: result.warning,
+        });
+      }
       if (text.length === 0) {
         toastManager.add({
           type: "info",
@@ -107,7 +120,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
       if (!onTranscript(text)) {
         toastManager.add({
           type: "warning",
-          title: "Couldn't put the words in the message box.",
+          title: "Couldn't send the message.",
           description: text,
         });
       }
@@ -116,7 +129,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
         toastManager.add({
           type: "error",
           title: "Speech helper isn't answering.",
-          description: helperHint(endpoint),
+          description: HELPER_HINT,
         });
       } else {
         toastManager.add({
@@ -139,7 +152,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
       toastManager.add({
         type: "error",
         title: "Speech helper isn't running.",
-        description: helperHint(endpoint),
+        description: HELPER_HINT,
       });
       return;
     }
@@ -247,7 +260,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
               <rect x="2" y="2" width="8" height="8" rx="1.5" />
             </svg>
           </TooltipTrigger>
-          <TooltipPopup>{withShortcut("Stop and transcribe")}</TooltipPopup>
+          <TooltipPopup>{withShortcut("Stop, rewrite and send")}</TooltipPopup>
         </Tooltip>
         <MicRecordingIndicator levelRef={levelRef} startedAt={startedAt} />
       </div>
@@ -256,14 +269,14 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
 
   const tooltip =
     phase === "transcribing"
-      ? "Transcribing…"
+      ? "Listening and rewriting…"
       : phase === "starting"
         ? "Starting microphone…"
         : helperOffline
-          ? "Scar Mic isn't running"
+          ? "Scar Mic isn't running on this chat's computer"
           : blocked
             ? "Mic blocked"
-            : withShortcut("Dictate");
+            : withShortcut("Talk (rewritten and sent)");
 
   return (
     <div ref={rootRef} className="flex items-center" data-fork-mic={phase}>
@@ -286,7 +299,7 @@ export function ComposerMicButton({ keybindings, disabled, onTranscript }: Compo
                       toastManager.add({
                         type: "error",
                         title: "Speech helper isn't running.",
-                        description: helperHint(endpoint),
+                        description: HELPER_HINT,
                       });
                   });
                   return;

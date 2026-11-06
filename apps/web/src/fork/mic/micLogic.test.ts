@@ -1,31 +1,11 @@
 import { describe, expect, it } from "vite-plus/test";
 import {
-  DEFAULT_MIC_ENDPOINT,
   classifyMicStartError,
   formatRecordingDuration,
   levelFromSamples,
-  normalizeMicEndpoint,
   pickRecorderMimeType,
-  resolveMicEndpoint,
   transcriptToInsert,
 } from "./micLogic";
-
-describe("normalizeMicEndpoint", () => {
-  it.each([
-    ["http://127.0.0.1:47811", "http://127.0.0.1:47811"],
-    ["  http://127.0.0.1:47811/  ", "http://127.0.0.1:47811"],
-    ["https://stt.example.com/api//", "https://stt.example.com/api"],
-    ["ftp://127.0.0.1", null],
-    ["127.0.0.1:47811", null],
-    ["", null],
-  ])("%s -> %s", (input, expected) => {
-    expect(normalizeMicEndpoint(input)).toBe(expected);
-  });
-
-  it("falls back to the default helper when the setting is unusable", () => {
-    expect(resolveMicEndpoint("not a url")).toBe(DEFAULT_MIC_ENDPOINT);
-  });
-});
 
 describe("formatRecordingDuration", () => {
   it.each([
@@ -55,8 +35,11 @@ describe("levelFromSamples", () => {
 });
 
 describe("transcriptToInsert", () => {
-  it("collapses whitespace and rejects non-strings", () => {
-    expect(transcriptToInsert("  hello \n  world ")).toBe("hello world");
+  it("tidies spaces, keeps line breaks and rejects non-strings", () => {
+    expect(transcriptToInsert("  hello   world ")).toBe("hello world");
+    expect(transcriptToInsert("Fix it.\r\n\n\n\n1. One  \n2. Two")).toBe(
+      "Fix it.\n\n1. One\n2. Two",
+    );
     expect(transcriptToInsert(undefined)).toBe("");
     expect(transcriptToInsert(42)).toBe("");
   });

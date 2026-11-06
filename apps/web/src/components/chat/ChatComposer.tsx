@@ -2441,6 +2441,19 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     );
   };
   const insertComposerTextStable = useStableCallback(insertComposerText);
+  // Fork mic: the rewritten message lands in the box, then sends once the draft has re-rendered.
+  const micAutoSendRef = useRef(false);
+  const insertMicMessageAndSend = useStableCallback((text: string) => {
+    if (!insertComposerText(text, "cursor", { ensureLeadingBoundary: true })) return false;
+    micAutoSendRef.current = true;
+    return true;
+  });
+  // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- sends the mic's message after the inserted text has re-rendered into the draft
+  useEffect(() => {
+    if (!micAutoSendRef.current || prompt.trim().length === 0) return;
+    micAutoSendRef.current = false;
+    submitComposerStable();
+  }, [prompt, submitComposerStable]);
 
   const insertAttachmentReferences = (
     references: ReadonlyArray<ComposerContextReference>,
@@ -3484,9 +3497,12 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                   <ComposerMicButton
                     keybindings={keybindings}
                     disabled={!canOperateThread}
-                    onTranscript={(text) =>
-                      insertComposerTextStable(text, "cursor", { ensureLeadingBoundary: true })
-                    }
+                    target={{
+                      environmentId,
+                      threadId: activeThread?.id ?? null,
+                      projectId: activeProjectId ?? null,
+                    }}
+                    onTranscript={insertMicMessageAndSend}
                   />
                 </div>
                 <div

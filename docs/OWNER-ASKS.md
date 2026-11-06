@@ -148,3 +148,13 @@ Asked if about 32 idle sessions could settle at once when this turns on: "Yes, s
 ## 2026-10-28 20:51 Ohio: T3 Code: do everything, mic, split view, usage always visible
 
 "I want you to do everything, right? Do everything, you know, everything in the settings. I want you to mess with everything your own. I just save this as a rule. Don't ever ask me to do this too that. Please always do it yourself and do it correctly because I'm not going to have time for anything, right? Do everything. I honestly want to make it kind of look a little bit better too. I feel like, you know, if we space a text that put less amount of text because I feel like. Bro, I have ADHD and I'm skimming over text and I just want to read basically what I'm supposed to know. Just do everything I ask you to do. Please, please. Add the mic option. Add everything like that. You know, if there's the option or if there's a way basically where we can add split view, basically like different sessions that are currently working and or things that need me. Or sessions are working. Like I want to see, for example, what I'm saying? If we can add split view basically where it will open up the page next to it on the right of it or something like that. I feel like there's a lot of cool things we can do. Again, the mic, all of the settings, everything that you know, for example, the usage limit, how much limits I have on my left, on my thing, basically on the right side or the top section, you know what I'm saying? There's so many things, honestly, that I want to add here."
+
+## 2026-11-05 — Voice input reliability + T3 Code mic
+
+- **Cause found:** mostly the speech model (streaming Nemotron mishears names, ignores the custom word list). Mic is quiet (peaks ~-17 dB) but not the main cause. Delete-key light cleanup was OFF (useCleanupModel=false), so raw words got pasted and agents replied "I don't know what you mean".
+- **"The other version" (speed point)** = the Delete key (plain words): fast but does nothing.
+- **Speech model:** accurate model after you stop (not live). OK to add ~5-10 sec.
+- **Runs where:** on the machine the chat is on (PC chats on PC, VPS chats on VPS).
+- **T3 mic modes:** one mode only: always smart rewrite (Opus, same writing style as Page Up) using that chat's memory, then auto send.
+- **Memory:** per project/chat, from what the owner and agent said in that conversation.
+- **OpenWhispr:** keep it for apps outside T3 Code (Discord, browser, games) and plug it into the same better model.
