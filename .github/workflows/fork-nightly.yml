@@ -11,6 +11,12 @@ permissions:
   contents: write
   issues: write
 
+# The sync job adds an "upstream" remote, and gh then defaults to pingdotgg/t3code. Without this the
+# "already published" check looked at upstream's releases, so every run rebuilt and then failed on
+# "a release with the same tag name already exists".
+env:
+  GH_REPO: ${{ github.repository }}
+
 concurrency:
   group: fork-nightly
   cancel-in-progress: false
