@@ -1,5 +1,12 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-14 Ohio: Nightly deep dive, use T3's own mic instead of OpenWhispr inside T3
+
+"I want you to do a deep dive into what has changed recently and what we can now do with it. [...] Look at the new built-in mic option and see how we can connect it and make it work. I believe you're currently running OpenWhispr, but I'd rather use the mic inside the app itself, the same way I usually use the mic directly in Claude Desktop. [...] There are options like "suggest the next prompt" and "group by project." I don't know if we added those or if they're built into the app now. [...] After that, we'll work on the design of the app itself."
+
+Answers: OpenWhispr: "Keep both". T3 mic key: "you can do the delete key. But make sure you change the delete key on the whisper flow out and put it any other random key." (OpenWhispr plain dictation moved Delete -> Insert; Page Up unchanged.) Cleanup AI: "I don't want it to be on my [Claude] Code subscription [...] set it up maybe with like a model on my PC" (local Ollama qwen3:4b-instruct as a T3 text generator, cleanup only).
+Then: "We could also use the latest model from the same provider my Discord bot uses for the cleanup. It's a really cheap model but also really good. [...] I'm already paying for it, so I'm fine with you using that same API key [...] This way all the settings should also work on my phone and everywhere else." Gave the Muse key: "Make sure you copy and save the Muse API key. This matters. [...] You'll probably use Muse for a lot of the apps." -> cleanup = muse-ember-1.0 on PC + VPS; local Ollama kept as a spare.
+
 ## 2026-11-14 Ohio: Back to official nightly, fresh setup, fork kept as a copy
 
 "T3 Code fits the way I work better [than Claude Desktop], so I want to move to a fresh T3 Code setup based on the nightly version. [...] Things aren't merging, and I'm missing a lot of new updates [...] I want to go back to the nightly version. I also heard T3 Code now lets you edit your own theme [...] I still want to build my own features into it later, for example a really good mic option in the back end. Copy the current version and leave that copy untouched. [...] On the VPS, delete the regular nightly version and the forked version, then set up a brand new one. Copy my settings [...] don't carry over the useless ones."
