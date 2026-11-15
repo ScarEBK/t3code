@@ -1,5 +1,9 @@
 # T3 Code design decisions (Scar, newest first)
 
+- 2026-11-14: A2 "looks really, really good" -> **dim Ken ~20%, keep all detail** (body 0.9->0.72, light 36%->29%, breathe 24-30%).
+
+- 2026-11-14: **Approved World A2** (Shadow + detailed Ken: dark @ body, bright chains/grill flicker, 36% light). Build it.
+
 - 2026-11-14: Picked **World A · Shadow** (likes the grey colors). Ken ASCII must be **far more detailed / high quality**, dense @-style glyphs ("it's so not detailed, bro"). Detail = 130-160 cols + long ink-sorted ramp.
 
 - 2026-11-14: Ken Carson shows as a **moving ASCII version** of the GIF (real GIF can't fit a T3 theme: 50,000-character cap, outside links blocked).
