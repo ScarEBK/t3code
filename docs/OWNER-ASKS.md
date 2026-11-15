@@ -6,6 +6,7 @@
 
 Answers: OpenWhispr: "Keep both". T3 mic key: "you can do the delete key. But make sure you change the delete key on the whisper flow out and put it any other random key." (OpenWhispr plain dictation moved Delete -> Insert; Page Up unchanged.) Cleanup AI: "I don't want it to be on my [Claude] Code subscription [...] set it up maybe with like a model on my PC" (local Ollama qwen3:4b-instruct as a T3 text generator, cleanup only).
 Then: "We could also use the latest model from the same provider my Discord bot uses for the cleanup. It's a really cheap model but also really good. [...] I'm already paying for it, so I'm fine with you using that same API key [...] This way all the settings should also work on my phone and everywhere else." Gave the Muse key: "Make sure you copy and save the Muse API key. This matters. [...] You'll probably use Muse for a lot of the apps." -> cleanup = muse-ember-1.0 on PC + VPS; local Ollama kept as a spare.
+Extras: "if there's any other also good settings, in your opinion, that you think we should add, then go for it" -> Muse Ember for titles + commits (PC + VPS), plain-English title instructions, Labs Group by project ON, Suggest next prompt ON. Keep-awake and continue-after-restart were already on.
 
 ## 2026-11-14 Ohio: Back to official nightly, fresh setup, fork kept as a copy
 
