@@ -1,5 +1,6 @@
 # T3 Code design decisions (Scar, newest first)
 
+- 2026-11-14: "dim the thing more 50% [...] I can't see the text well [...] like a foggy translucent thing" -> Ken halved (body .36, light 12-15%) + frosted fog on the chat scroller (rgba(22,22,22,.30), blur 2.5px).
 - 2026-11-14: "zcode theme was good like left side menu" -> theme colors = old fork Z Code look (dd30cc13d0): charcoal sidebar/chrome #303030, main panel #161616, cards #1F1F1F, popovers #2A2A2A, text #E6E6E6, muted #8F8F8F, neutral controls, color only for status. Sidebar needs CSS (`[data-slot=sidebar-inner]` bg) because T3 draws it as glass.
 
 - 2026-11-14: A2 "looks really, really good" -> **dim Ken ~20%, keep all detail** (body 0.9->0.72, light 36%->29%, breathe 24-30%).
