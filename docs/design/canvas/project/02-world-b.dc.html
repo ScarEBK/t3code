@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>World B: Monitor</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <style>
+          body {
+            margin: 0;
+          }
+          svg {
+            display: block;
+            flex: none;
+          }
+          button {
+            background: none;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            color: inherit;
+            font: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+          }
+          p {
+            margin: 0;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1920px;
+          height: 1032px;
+          position: relative;
+          overflow: hidden;
+          background: #000000;
+          color: #e4e4e4;
+          font-family: &quot;Cascadia Mono&quot;, &quot;Cascadia Code&quot;, Consolas, monospace;
+          font-size: 13px;
+          line-height: 24px;
+        "
+      >
+        <!-- Sidebar -->
+        <div
+          style="
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 289px;
+            height: 1032px;
+            background: #000000;
+            border-right: 1px solid #2a2a2a;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              left: 20px;
+              top: 8px;
+              height: 22px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            "
+          >
+            <button aria-label="Toggle sidebar" style="color: #b8b8b8">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="miter"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" />
+                <path d="M9 3v18" />
+              </svg>
+            </button>
+            <div style="font-size: 14px; color: #8c8c8c">
+              <span style="font-weight: 700; color: #ffffff">T3</span> Code
+            </div>
+            <button aria-label="Back" style="color: #8c8c8c; margin-left: 6px">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="square"
+                aria-hidden="true"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button aria-label="Forward" style="color: #5a5a5a; margin-left: 6px">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="square"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 16px;
+              right: 16px;
+              top: 52px;
+              height: 28px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#B8B8B8"
+              stroke-width="1.5"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <div style="font-weight: 600; color: #e4e4e4; flex: 1">Search</div>
+            <button aria-label="Filter" style="color: #b8b8b8; width: 26px">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="square"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18M7 12h10M10 18h4" />
+              </svg>
+            </button>
+            <button aria-label="New project" style="color: #b8b8b8; width: 26px">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="miter"
+                aria-hidden="true"
+              >
+                <path d="M2 4h7l2.500 3H22v13H2ZM12 11v6M9 14h6" />
+              </svg>
+            </button>
+            <button aria-label="New thread" style="color: #b8b8b8; width: 22px">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="miter"
+                aria-hidden="true"
+              >
+                <path d="M12 3H3v18h18v-9" />
+                <path d="M19 2.500 21.500 5 12 14.500l-3.500 1 1-3.500Z" />
+              </svg>
+            </button>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 19px;
+              right: 20px;
+              top: 106px;
+              height: 28px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8C8C8C"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <rect x="4" y="4" width="16" height="16" stroke-dasharray="3 3" />
+            </svg>
+            <div style="font-weight: 600; color: #b8b8b8; flex: 1">No project</div>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8C8C8C"
+              stroke-width="1.6"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+          <!-- selected thread: reverse video -->
+          <div
+            style="
+              position: absolute;
+              left: 8px;
+              top: 140px;
+              width: 272px;
+              height: 40px;
+              box-sizing: border-box;
+              padding: 0 10px 0 41px;
+              background: #e4e4e4;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              color: #000000;
+            "
+          >
+            <div style="font-weight: 700">T3 Code Nigh...</div>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 12px;
+                font-weight: 600;
+              "
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" stroke-dasharray="3 3.3" />
+              </svg>
+              Working
+            </div>
+          </div>
+
+          <!-- the monitor: Ken plays here, bright, nothing ever on top of him -->
+          <div
+            style="
+              position: absolute;
+              left: 11px;
+              top: 661px;
+              width: 268px;
+              height: 268px;
+              box-sizing: border-box;
+              border: 1px solid #3d3d3d;
+              background: repeating-linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.045) 0,
+                rgba(255, 255, 255, 0.045) 1px,
+                transparent 1px,
+                transparent 3px
+              );
+            "
+          >
+            <div
+              aria-hidden="true"
+              style="
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 266px;
+                height: 266px;
+                font-family: Consolas, monospace;
+                font-size: 10.5px;
+                line-height: 11.55px;
+                white-space: pre;
+                color: rgba(255, 255, 255, 0.66);
+              "
+            >
+              ----------: ======== --::::--::: ===== ----::::-:: ====== ----------: :====
+              ----------: + -==== --::------- #*+#@+. @ -: ---== ------------#@@@@+ @# -========
+              ------------.+%: @ *========= ------------- -=========== -------------: ===========
+              ---------------:.++ --======= ----------------: .. .:--== --------::.. : :. -----: :
+              ::. ---: :* .:+. --: ++ : :::++ -: .*::. *+ *: . *+ .:%++. *+ *# :* *@. .**+*+: +*: .
+              ++#* ##+: *. *. :.:::%. : .+**: *@#*#:
+            </div>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 22px;
+              top: 651px;
+              height: 20px;
+              padding: 0 7px;
+              background: #000000;
+              font-size: 11.5px;
+              line-height: 20px;
+              color: #b8b8b8;
+            "
+          >
+            ken.gif
+          </div>
+          <div
+            style="
+              position: absolute;
+              right: 21px;
+              top: 651px;
+              height: 20px;
+              padding: 0 7px;
+              background: #000000;
+              font-size: 11.5px;
+              line-height: 20px;
+              color: #8c8c8c;
+            "
+          >
+            01/24
+          </div>
+
+          <div
+            style="
+              position: absolute;
+              left: 18px;
+              right: 22px;
+              top: 944px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              font-size: 12.5px;
+            "
+          >
+            <div style="font-weight: 600; color: #e4e4e4; flex: 1">Settled</div>
+            <div style="color: #b8b8b8">140</div>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8C8C8C"
+              stroke-width="1.6"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="m9 6 6 6-6 6" />
+            </svg>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 16px;
+              right: 19px;
+              top: 993px;
+              height: 24px;
+              display: flex;
+              align-items: center;
+              gap: 24px;
+              color: #b8b8b8;
+            "
+          >
+            <button aria-label="Settings">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+            <button aria-label="Source control">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <circle cx="6" cy="6" r="2.5" />
+                <circle cx="18" cy="18" r="2.5" />
+                <path d="M6 8.500V21M18 15.500V6h-6" />
+              </svg>
+            </button>
+            <button aria-label="Usage">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="square"
+                aria-hidden="true"
+              >
+                <path d="M6 20V10M12 20V4M18 20v-6" />
+              </svg>
+            </button>
+            <div style="flex: 1"></div>
+            <button aria-label="Refresh">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 12a9 9 0 0 1 15-6.700L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.700L3 16M3 21v-5h5"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat header -->
+        <div
+          style="
+            position: absolute;
+            left: 290px;
+            top: 0;
+            width: 1630px;
+            height: 37px;
+            font-size: 13.5px;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              left: 20px;
+              top: 9px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              height: 20px;
+            "
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8C8C8C"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <rect x="4" y="4" width="16" height="16" stroke-dasharray="3 3" />
+            </svg>
+            <div style="font-weight: 600; color: #b8b8b8">No project</div>
+            <div style="color: #5a5a5a; margin: 0 8px">/</div>
+            <div style="font-weight: 700; color: #ffffff">T3 Code Nightly Features Deep Dive</div>
+          </div>
+          <div
+            style="
+              position: absolute;
+              right: 12px;
+              top: 3px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              color: #b8b8b8;
+            "
+          >
+            <button
+              aria-label="Thread details"
+              style="width: 32px; height: 32px; background: #e4e4e4; color: #000000"
+            >
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="square"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" />
+                <path d="M7 8h10M7 12h10M7 16h10" />
+              </svg>
+            </button>
+            <button aria-label="Terminal drawer" style="width: 32px; height: 32px">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" />
+                <path d="M3 15h18" />
+              </svg>
+            </button>
+            <button aria-label="Side panel" style="width: 32px; height: 32px">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" />
+                <path d="M15 3v18" />
+              </svg>
+            </button>
+            <button aria-label="Minimize" style="width: 46px; height: 32px; margin-left: 12px">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M4 12h16" />
+              </svg>
+            </button>
+            <button aria-label="Maximize" style="width: 46px; height: 32px">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <rect x="4" y="7" width="13" height="13" />
+                <path d="M8 7V4h12v12h-3" />
+              </svg>
+            </button>
+            <button aria-label="Close" style="width: 46px; height: 32px">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 5l14 14M19 5 5 19" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div
+          style="
+            position: absolute;
+            left: 348px;
+            top: 50px;
+            width: 1241px;
+            height: 1px;
+            background: #2a2a2a;
+          "
+        ></div>
+
+        <!-- Timeline -->
+        <div
+          style="
+            position: absolute;
+            left: 348px;
+            top: 66px;
+            width: 1241px;
+            display: flex;
+            flex-direction: column;
+            color: #e4e4e4;
+          "
+        >
+          <p>
+            🎯 <strong style="color: #ffffff">Goal:</strong> A calm black-and-white ASCII-style T3
+            theme with a faint Ken Carson GIF playing behind it, without making the code hard to
+            read. 🛠️ <strong style="color: #ffffff">I'll do:</strong> Follow the design steps: check
+            the GIF and what T3 themes can do, draw picture options for you to pick, then build it
+            as a real T3 theme. ✅ <strong style="color: #ffffff">Done looks like:</strong> You pick
+            a picture, then T3 has that look with the GIF playing softly behind and the code still
+            easy to read.
+          </p>
+          <p style="margin-top: 14px">
+            🛠️ First checking that a T3 theme
+            <strong style="color: #ffffff">can even show a moving GIF</strong> behind the app,
+            before we design anything.
+          </p>
+          <div
+            style="
+              margin-top: 14px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              color: #8c8c8c;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M14.700 6.300a1 1 0 0 0 0 1.400l1.600 1.600a1 1 0 0 0 1.400 0l3.770-3.770a6 6 0 0 1-7.940 7.940l-6.910 6.910a2.120 2.120 0 0 1-3-3l6.910-6.910a6 6 0 0 1 7.940-7.940l-3.760 3.760z"
+              />
+            </svg>
+            <div>Ran 5 commands and read 1 file</div>
+          </div>
+          <img
+            src="/_blob/84d2ea2da58bef80ee36fa9a41ef1558"
+            alt="Six frames of the Ken Carson GIF"
+            style="
+              margin-top: 10px;
+              width: 537px;
+              height: 89px;
+              object-fit: cover;
+              border: 1px solid #3d3d3d;
+              box-sizing: border-box;
+            "
+          />
+          <p style="margin-top: 14px">
+            T3 themes block outside pictures and cap text at about 50,000 characters, so a real 6.5
+            MB GIF won't fit. I'm testing a version that turns the GIF into moving ASCII text
+            instead.
+          </p>
+          <div
+            style="
+              margin-top: 12px;
+              width: 820px;
+              box-sizing: border-box;
+              padding: 14px 18px;
+              background: #000000;
+              border: 1px solid #3d3d3d;
+              font-size: 13px;
+              line-height: 24px;
+              white-space: pre;
+              color: #f2f2f2;
+            "
+          >
+            <span style="color: #9c9c9c">RAMP</span> =
+            <span style="color: #9c9c9c">" .,:;-=+*#%@"</span>
+            <span style="color: #ffffff; font-weight: 700">for</span> f
+            <span style="color: #ffffff; font-weight: 700">in</span> files: im =
+            Image.open(f).convert(<span style="color: #9c9c9c">"L"</span>) im =
+            ImageOps.autocontrast(im, cutoff=<span style="color: #bebebe">2</span
+            >).filter(ImageFilter.GaussianBlur(<span style="color: #bebebe">0.6</span>)) im =
+            im.resize((cols, rows), Image.LANCZOS)
+          </div>
+          <div
+            style="
+              margin-top: 14px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              color: #8c8c8c;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M14.700 6.300a1 1 0 0 0 0 1.400l1.600 1.600a1 1 0 0 0 1.400 0l3.770-3.770a6 6 0 0 1-7.940 7.940l-6.910 6.910a2.120 2.120 0 0 1-3-3l6.910-6.910a6 6 0 0 1 7.940-7.940l-3.760 3.760z"
+              />
+            </svg>
+            <div>Ran 2 commands and read 1 file</div>
+          </div>
+          <img
+            src="/_blob/f42101743fd108d08d378d0a133cb433"
+            alt="Four ASCII frames made from the GIF"
+            style="
+              margin-top: 10px;
+              width: 537px;
+              height: 124px;
+              object-fit: cover;
+              border: 1px solid #3d3d3d;
+              box-sizing: border-box;
+            "
+          />
+          <p style="margin-top: 14px">
+            ✅ <strong style="color: #ffffff">It works:</strong> your GIF turned into moving ASCII
+            text (that preview is 4 of its frames). Small enough to fit inside a T3 theme.
+          </p>
+          <div
+            style="
+              margin-top: 14px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              color: #8c8c8c;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M14.700 6.300a1 1 0 0 0 0 1.400l1.600 1.600a1 1 0 0 0 1.400 0l3.770-3.770a6 6 0 0 1-7.940 7.940l-6.910 6.910a2.120 2.120 0 0 1-3-3l6.910-6.910a6 6 0 0 1 7.940-7.940l-3.760 3.760z"
+              />
+            </svg>
+            <div style="flex: 1">AskUserQuestion</div>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="m9 6 6 6-6 6" />
+            </svg>
+          </div>
+          <div
+            style="
+              margin-top: 6px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              color: #8c8c8c;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M21 11.500a8.400 8.400 0 0 1-9 8.400 8.500 8.500 0 0 1-3.800-.9L3 21l1.900-5.200A8.400 8.400 0 1 1 21 11.500Z"
+              />
+            </svg>
+            <div
+              style="
+                flex: 1;
+                min-width: 0;
+                color: #e4e4e4;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              "
+            >
+              🎞️ T3 themes can't hold a real GIF (too big, outside links blocked). How should Ken
+              Carson show up behind the app?
+              <span style="margin-left: 8px">Moving ASCII version (Recommended)</span>
+            </div>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="m9 6 6 6-6 6" />
+            </svg>
+          </div>
+          <div
+            style="
+              margin-top: 14px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              color: #8c8c8c;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="m5 8 4 4-4 4M12 17h7" />
+            </svg>
+            <div>Running cua-driver.exe</div>
+          </div>
+        </div>
+
+        <!-- Scrollbar thumb -->
+        <div
+          style="
+            position: absolute;
+            left: 1910px;
+            top: 800px;
+            width: 5px;
+            height: 80px;
+            background: #5a5a5a;
+          "
+        ></div>
+
+        <!-- Composer -->
+        <div
+          style="
+            position: absolute;
+            left: 343px;
+            top: 885px;
+            width: 1247px;
+            height: 125px;
+            box-sizing: border-box;
+            background: #000000;
+            border: 1px solid #3d3d3d;
+          "
+        >
+          <div style="position: absolute; left: 19px; top: 16px; font-weight: 700; color: #ffffff">
+            &gt;
+          </div>
+          <div style="position: absolute; left: 40px; top: 16px; color: #8c8c8c">
+            Ask anything. @ files, $ skills, / commands
+          </div>
+          <button
+            aria-label="Attach files"
+            style="
+              position: absolute;
+              left: 17px;
+              top: 87px;
+              width: 20px;
+              height: 20px;
+              color: #b8b8b8;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="m21.400 11.600-8.500 8.500a5.500 5.500 0 0 1-7.800-7.800l8.500-8.500a3.700 3.700 0 0 1 5.200 5.200l-8.500 8.500a1.800 1.800 0 0 1-2.600-2.600l7.800-7.800"
+              />
+            </svg>
+          </button>
+          <div
+            style="
+              position: absolute;
+              right: 10px;
+              top: 80px;
+              height: 32px;
+              display: flex;
+              align-items: center;
+              gap: 22px;
+            "
+          >
+            <button style="gap: 8px; font-size: 13.5px; font-weight: 700; color: #e4e4e4">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#D97757"
+                stroke-width="2.200"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 3v18M4.200 7.500l15.600 9M19.800 7.500l-15.600 9M7.500 4.200l9 15.600M16.500 4.200l-9 15.600M3 12h18"
+                /></svg
+              >Opus 5.5 High
+            </button>
+            <button aria-label="Dictate" style="color: #b8b8b8">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.500"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 11a7 7 0 0 0 14 0M12 18v4" />
+              </svg>
+            </button>
+            <button aria-label="Stop" style="width: 32px; height: 32px; background: #e5484d">
+              <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <rect x="1.500" y="1.500" width="9" height="9" fill="#FFFFFF" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Thread details card -->
+        <div
+          style="
+            position: absolute;
+            left: 1623px;
+            top: 53px;
+            width: 276px;
+            height: 229px;
+            box-sizing: border-box;
+            background: #000000;
+            border: 1px solid #3d3d3d;
+            font-size: 12.5px;
+          "
+        >
+          <div
+            style="
+              position: absolute;
+              left: 20px;
+              right: 18px;
+              top: 13px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#E4E4E4"
+              stroke-width="1.500"
+              aria-hidden="true"
+            >
+              <rect x="3" y="4" width="18" height="7" />
+              <rect x="3" y="13" width="18" height="7" />
+              <path d="M7 7.500h.01M7 16.500h.01" stroke-linecap="square" />
+            </svg>
+            <div style="font-weight: 700; color: #ffffff; flex: 1">Desktop-KETNT</div>
+            <button aria-label="Change folder" style="color: #b8b8b8">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.500"
+                stroke-linejoin="miter"
+                aria-hidden="true"
+              >
+                <path d="M21 11V7H11L9 5H3v14h8M15 17h6M21 17l-2.500-2.500M21 17l-2.500 2.500" />
+              </svg>
+            </button>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 20px;
+              right: 18px;
+              top: 49px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            "
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="#2F9BE8"
+                d="M17 2.500 8.200 10.700 4.300 7.700 2.500 8.600 6.200 12l-3.700 3.400 1.800.9 3.900-3L17 21.500l4.500-2.200V4.700L17 2.500Zm0 5.300v8.400L11.400 12 17 7.800Z"
+              />
+            </svg>
+            <div style="font-weight: 600; color: #e4e4e4; flex: 1">Open in VS Code</div>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#B8B8B8"
+              stroke-width="1.600"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 20px;
+              right: 18px;
+              top: 84px;
+              height: 26px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#B8B8B8"
+              stroke-width="1.500"
+              stroke-linecap="square"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <div style="font-weight: 600; color: #e4e4e4">Add project script</div>
+          </div>
+          <div
+            style="
+              position: absolute;
+              left: 0;
+              right: 0;
+              top: 123px;
+              height: 1px;
+              background: #3d3d3d;
+            "
+          ></div>
+          <div
+            style="
+              position: absolute;
+              left: 20px;
+              right: 16px;
+              top: 138px;
+              display: grid;
+              grid-template-columns: 112px 86px 1fr;
+              row-gap: 2px;
+              align-items: center;
+              font-weight: 600;
+              color: #e4e4e4;
+            "
+          >
+            <div>Session</div>
+            <div style="height: 3px; background: #3d3d3d">
+              <div style="width: 93%; height: 3px; background: #ffffff"></div>
+            </div>
+            <div style="text-align: right">93%</div>
+            <div>Weekly</div>
+            <div style="height: 3px; background: #3d3d3d">
+              <div style="width: 71%; height: 3px; background: #ffffff"></div>
+            </div>
+            <div style="text-align: right">71%</div>
+            <div>Weekly · Fable</div>
+            <div style="height: 3px; background: #3d3d3d">
+              <div style="width: 68%; height: 3px; background: #ffffff"></div>
+            </div>
+            <div style="text-align: right">68%</div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1920,"height":1032}}'>
+      class Component extends DCLogic {
+      renderVals() {
+      return {};
+      }
+      }
+    </script>
+  </body>
+</html>

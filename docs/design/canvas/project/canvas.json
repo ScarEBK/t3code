@@ -1,0 +1,59 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-14T18:30:00Z" },
+  "title": "T3 Code theme: Ken Carson ASCII",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1920, "h": 1032, "title": "01 World A: Shadow" },
+    "02-world-b.dc.html": {
+      "x": 2000,
+      "y": 0,
+      "w": 1920,
+      "h": 1032,
+      "title": "02 World B: Monitor"
+    },
+    "03-world-c.dc.html": {
+      "x": 4000,
+      "y": 0,
+      "w": 1920,
+      "h": 1032,
+      "title": "03 World C: Photocopy"
+    }
+  },
+  "order": ["Main.dc.html", "02-world-b.dc.html", "03-world-c.dc.html"],
+  "notes": {
+    "title": {
+      "x": 0,
+      "y": -320,
+      "text": "T3 theme: pick a world",
+      "kind": "title1",
+      "maxW": 5920
+    },
+    "spec-a": {
+      "x": 0,
+      "y": 1100,
+      "w": 1000,
+      "size": "l",
+      "fill": "gray",
+      "text": "A: SHADOW\nKen is a dark shadow on the wall behind the chat. He is darker than the screen, so words on top of him get clearer, not dimmer. Only his chains and grill catch light.\n\nWhere: behind the chat only, right side, full height. Sidebar, composer, cards and code blocks are solid, nothing shows through them.\nStrength: shadow = black glyphs at 50%. Sparkle = white glyphs at 28%.\nType: Segoe UI Variable for reading, Cascadia Code for code. ASCII in Consolas 29px on a 32px line.\nColors: wall #171717, sidebar #111111, cards #1F1F1F, lines #2E2E2E, text #EDEDED, quiet text #9A9A9A, shadow #000000, sparkle #FFFFFF, stop button #E5484D.\nSignature: two ASCII layers from the real GIF on one 64x32 grid: the body, and the light on it.\nHow it moves: the body steps once every 1.6s (6 frames). The sparkle steps every 0.8s (12 frames) and breathes between 22% and 32% over 2.4s. Loop 9.6s. Hard steps, no fades between frames. Reduced motion: one still frame."
+    },
+    "spec-b": {
+      "x": 2000,
+      "y": 1100,
+      "w": 1000,
+      "size": "l",
+      "fill": "gray",
+      "text": "B: MONITOR\nThe whole app turns into a text terminal. Ken plays on a small bright screen at the bottom of the sidebar. Nothing at all sits behind the chat or the code.\n\nWhere: sidebar, above Settled, 266x266px. Chat stays pure black.\nStrength: white glyphs at 66%, because no text ever sits on top of him.\nType: Cascadia Mono for everything. ASCII in Consolas 10.5px on an 11.55px line.\nColors: everything #000000, lines #2A2A2A, strong lines #3D3D3D, text #E4E4E4, quiet text #8C8C8C, selected row = white block #E4E4E4 with black text, stop button #E5484D.\nSignature: square corners, 1px lines, the selected thread in reverse video, and a live frame counter next to ken.gif.\nHow it moves: all 24 frames at the GIF's real speed, one step every 0.27s (loop 6.4s). The counter 01/24 to 24/24 ticks with it. Reduced motion: one still frame, counter hidden."
+    },
+    "spec-c": {
+      "x": 4000,
+      "y": 1100,
+      "w": 1000,
+      "size": "l",
+      "fill": "gray",
+      "text": "C: PHOTOCOPY\nThe light one. The app is a sheet of paper and Ken is a faded photocopy printed in the bottom right corner of the chat. Code blocks are the only solid black on the page, so code is the loudest thing.\n\nWhere: behind the chat, bottom right, 704x704px, running off the edge.\nStrength: black ink glyphs at 12%.\nType: Courier New Bold for labels and lists, Segoe UI Variable for reading, Consolas for code. ASCII in Consolas 16px on a 17.6px line.\nColors: paper #F1F1EF, card paper #FBFBFA, ink #111111, quiet ink #5C5C5A, soft lines #C9C9C5, code block #0D0D0D with #F1F1EF text, stop button #D12B2B.\nSignature: ink rules, black code blocks, the selected thread as a black bar.\nHow it moves: 8 frames, one hard cut every 1.5s, like a page being re-printed (loop 12s). Reduced motion: one still frame."
+    }
+  },
+  "designSystems": []
+}

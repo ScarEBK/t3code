@@ -1,5 +1,10 @@
 # Owner asks (Scar's words, word for word, newest on top)
 
+## 2026-11-14 Ohio: T3 theme look
+
+"I really would like something [ASCII] sort of style [...] something calm in the background possibly something like Ken Carson running in the background like a GIF [...] make sure the theme actually matches the opacity of it I don't want it to be too high [...] because I still want to see the code it's like black and white [...] if you can make it a lot better basically" (giphy ykb8uKU1OHL9RwnfYy). Picked moving ASCII over a still. Worlds: "the shadow one is the best one. I like the gray color [...] but [...] it's so not detailed, bro [...] I want it to have a lot of more details [...] like all like [@] signs [...] a lot more detailed a lot more high quality".
+Usage meter: "This is 93% left. [...] Just keep going".
+
 ## 2026-11-14 Ohio: Nightly deep dive, use T3's own mic instead of OpenWhispr inside T3
 
 "I want you to do a deep dive into what has changed recently and what we can now do with it. [...] Look at the new built-in mic option and see how we can connect it and make it work. I believe you're currently running OpenWhispr, but I'd rather use the mic inside the app itself, the same way I usually use the mic directly in Claude Desktop. [...] There are options like "suggest the next prompt" and "group by project." I don't know if we added those or if they're built into the app now. [...] After that, we'll work on the design of the app itself."

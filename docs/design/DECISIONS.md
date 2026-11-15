@@ -1,5 +1,7 @@
 # T3 Code design decisions (Scar, newest first)
 
+- 2026-11-14: Picked **World A · Shadow** (likes the grey colors). Ken ASCII must be **far more detailed / high quality**, dense @-style glyphs ("it's so not detailed, bro"). Detail = 130-160 cols + long ink-sorted ramp.
+
 - 2026-11-14: Ken Carson shows as a **moving ASCII version** of the GIF (real GIF can't fit a T3 theme: 50,000-character cap, outside links blocked).
 - 2026-11-14: New look = **ASCII style, black and white, calm**. Ken Carson GIF (giphy ykb8uKU1OHL9RwnfYy) "running in the background", faint enough that code stays readable; "make it a lot better" if there's a way.
 - 2026-11-14: Built as an official T3 theme (colors + theme CSS), not a fork. Stays on the official nightly.
